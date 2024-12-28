@@ -286,11 +286,12 @@ import Phaser from 'phaser';
           this.canInput = false;
           this.isShowingPattern = true;
           this.logger.info('Handling failure, resetting state');
-          this.logger.info('Current patterns:', this.patterns);
-          this.logger.info('Player sequence:', this.playerSequence);
           
-          // Show failure message
+          // Show failure message and wait for it to complete
           await this.transitionManager.showFailure();
+          
+          // Add a small delay after failure message
+          await new Promise(resolve => this.time.delayedCall(500, resolve));
           
           // Reset player state
           this.playerSequence = [];
@@ -309,12 +310,16 @@ import Phaser from 'phaser';
             circle.setVisible(this.difficulty === 'novice');
           });
           
-          // Show countdown before replaying pattern
           this.logger.info('Starting countdown before pattern replay');
+          // Wait for countdown
           await this.countdownManager.showCountdown();
           
-          this.logger.info('Replaying pattern after failure. Pattern length:', this.patterns.length);
-          this.logger.info('Pattern details:', this.patterns);
+          // Add a small delay before showing pattern
+          await new Promise(resolve => this.time.delayedCall(500, resolve));
+          
+          this.logger.info('Replaying pattern after failure:', this.patterns);
+          // Show pattern again with clean state
+          this.isShowingPattern = true;
           await this.showPattern();
           this.isShowingPattern = false;
           this.canInput = true;
