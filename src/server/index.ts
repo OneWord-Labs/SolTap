@@ -7,6 +7,20 @@ const app = express();
 const port = 3000;
 const bot = new TelegramBot(TELEGRAM_CONFIG.botToken, { polling: true });
 
+bot.on('error', (error) => {
+  console.error('Telegram Bot Error:', error);
+});
+
+bot.on('polling_error', (error) => {
+  console.error('Telegram Polling Error:', error);
+});
+
+bot.getMe().then((botInfo) => {
+  console.log('Bot connected successfully:', botInfo.username);
+}).catch((error) => {
+  console.error('Failed to connect bot:', error);
+});
+
 app.use(express.json());
 app.use(express.static('dist'));
 
