@@ -1,10 +1,11 @@
 import 'dotenv/config';
-import express, { Request, Response, Router, RequestHandler } from 'express';
+import express, { Request, Response, Router, RequestHandler, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { TelegramService } from '../services/telegram/telegram.service.js';
 import { Logger } from '../utils/Logger.js';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +28,29 @@ app.use(express.json());
 
 // Initialize services
 const telegramService = TelegramService.getInstance();
+
+// Telegram webhook authentication middleware
+const authenticateTelegramWebhook = ((req: Request, res: Response, next: NextFunction) => {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    logger.error('TELEGRAM_BOT_TOKEN not set');
+    return res.sendStatus(401);
+  }
+
+  // Log the full request for debugging
+  logger.info('Webhook request headers:', req.headers);
+  logger.info('Webhook request body:', req.body);
+
+  // Allow health check endpoint without verification
+  if (req.path === '/health') {
+    return next();
+  }
+
+  next();
+}) as RequestHandler;
+
+// Apply Telegram webhook authentication to all API routes
+router.use(authenticateTelegramWebhook);
 
 // Health check endpoint
 router.get('/health', (async (_req: Request, res: Response) => {
