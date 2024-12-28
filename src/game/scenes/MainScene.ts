@@ -284,9 +284,11 @@ import Phaser from 'phaser';
       private async handleFailure() {
         this.canInput = false;
         this.isShowingPattern = false;
+        
+        // Show failure message
         await this.transitionManager.showFailure();
         
-        // Reset game state
+        // Reset all game state
         this.playerSequence = [];
         this.isLongPressing = false;
         this.longPressIndex = -1;
@@ -295,11 +297,15 @@ import Phaser from 'phaser';
           this.longPressTimer = null;
         }
         
-        // Reset circles
+        // Reset and hide all circles
         this.circles.forEach(circle => {
           circle.hideLongPressIndicator();
           circle.setVisible(false);
+          circle.setActiveState(false);
         });
+        
+        // Wait a moment before showing countdown
+        await new Promise(resolve => this.scene.time.delayedCall(1000, resolve));
         
         // Generate new pattern for the same level
         this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
