@@ -40,9 +40,11 @@ import { Pattern, PatternType } from '../types';
 
       private static getPatternType(level: number, difficulty: DifficultyMode): PatternType {
         PatternGenerator.logger.info(`getPatternType level: ${level}`);
-        if (level === 1) {
-          return 'tap';
-        }
+        if (level === 1) return 'tap';
+        if (level === 2) return Math.random() < 0.9 ? 'tap' : 'hold';
+        if (level < 5) return Math.random() < 0.7 ? 'tap' : 'hold';
+        if (level < 8) return Math.random() < 0.6 ? 'tap' : Math.random() < 0.8 ? 'hold' : 'rapid';
+        return Math.random() < 0.4 ? 'tap' : Math.random() < 0.7 ? 'hold' : 'rapid';
 
         const rand = Math.random();
         if (level === 2) {

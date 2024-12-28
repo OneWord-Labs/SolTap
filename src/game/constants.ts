@@ -24,6 +24,9 @@ export const REWARDS = {
 
 export const GAME_CONFIG = {
   circleCount: 4,
+  speedMultiplier: 1.1,  // Speed increases per level
+  basePatternDelay: 500, // Base delay between patterns
+  minPatternDelay: 200,  // Minimum delay between patterns
   minCircleSpacing: 100,
   circlePadding: 100,
   circleRadius: 40,

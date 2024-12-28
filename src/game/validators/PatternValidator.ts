@@ -16,6 +16,17 @@ export class PatternValidator {
   private static comparePatterns(pattern1: Pattern, pattern2: Pattern): boolean {
     if (pattern1.index !== pattern2.index) return false;
     if (pattern1.type !== pattern2.type) return false;
+    
+    const tolerance = 100; // 100ms tolerance for timing
+    
+    switch (pattern1.type) {
+      case 'hold':
+        return Math.abs((pattern1.duration || 0) - (pattern2.duration || 0)) <= tolerance;
+      case 'rapid':
+        return pattern1.count === pattern2.count;
+      default:
+        return true;
+    }
 
     switch (pattern1.type) {
       case 'hold':

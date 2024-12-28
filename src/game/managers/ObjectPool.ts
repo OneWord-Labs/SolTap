@@ -43,3 +43,30 @@ export class ObjectPool<T> {
     this.pool = [];
   }
 }
+import { Circle } from '../components/Circle';
+
+export class ObjectPool {
+  private pool: Circle[] = [];
+  private scene: Phaser.Scene;
+  private isExpertMode: boolean;
+
+  constructor(scene: Phaser.Scene, isExpertMode: boolean) {
+    this.scene = scene;
+    this.isExpertMode = isExpertMode;
+  }
+
+  acquire(x: number, y: number): Circle {
+    if (this.pool.length > 0) {
+      const circle = this.pool.pop()!;
+      circle.setPosition(x, y);
+      circle.setVisible(true);
+      return circle;
+    }
+    return new Circle(this.scene, x, y, this.isExpertMode);
+  }
+
+  release(circle: Circle) {
+    circle.setVisible(false);
+    this.pool.push(circle);
+  }
+}
