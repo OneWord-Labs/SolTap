@@ -72,19 +72,21 @@ import Phaser from 'phaser';
 
       async activate(duration: number = 500): Promise<void> {
         this.logger.info(`Activating circle at x: ${this.x}, y: ${this.y}`);
-        this.setVisible(true);
-        this.setActiveState();
-        
+        this.setVisible(false);
         await new Promise(resolve => {
-          this.scene.time.delayedCall(duration, resolve);
+          this.scene.time.delayedCall(100, () => {
+            this.setVisible(true);
+            this.setActiveState();
+            this.scene.time.delayedCall(duration, () => {
+              if (this.isExpertMode) {
+                this.setVisible(false);
+              } else {
+                this.setInactiveState();
+              }
+              resolve();
+            });
+          });
         });
-        
-        if (this.isExpertMode) {
-          this.logger.info(`Deactivating circle at x: ${this.x}, y: ${this.y}`);
-          this.setVisible(false);
-        } else {
-          this.setInactiveState();
-        }
       }
 
       async playTapAnimation(duration: number = 200): Promise<void> {
