@@ -1,8 +1,14 @@
 import 'dotenv/config';
 import express, { Request, Response, Router, RequestHandler } from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { TelegramService } from '../services/telegram/telegram.service.js';
 import { Logger } from '../utils/Logger.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DIST_DIR = path.join(__dirname, '../../');
 
 const app = express();
 const router = Router();
@@ -18,6 +24,7 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static(DIST_DIR));
 
 // Initialize services
 const telegramService = TelegramService.getInstance();
@@ -66,6 +73,11 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
 
 // Mount API routes
 app.use('/api', router);
+
+// Serve index.html for all other routes
+app.get('*', (_req: Request, res: Response) => {
+  res.sendFile(path.join(DIST_DIR, 'index.html'));
+});
 
 // Start server
 const server = app.listen(port, '0.0.0.0', () => {
