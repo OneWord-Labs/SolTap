@@ -286,11 +286,13 @@ import Phaser from 'phaser';
           // Disable input and reset state
           this.canInput = false;
           this.isShowingPattern = false;
+          this.logger.info('Handling failure, resetting state');
           
           // Show failure message and wait
           await this.transitionManager.showFailure();
+          await new Promise(resolve => this.time.delayedCall(500, resolve));
           
-          // Reset game state
+          // Reset game state but keep the same patterns
           this.playerSequence = [];
           this.isLongPressing = false;
           this.longPressIndex = -1;
@@ -313,10 +315,12 @@ import Phaser from 'phaser';
             this.circles.forEach(circle => circle.setVisible(false));
           }
           
-          // Start sequence with proper timing and show same pattern again
+          this.logger.info('Showing pattern again after failure:', this.patterns);
+          // Show countdown and pattern again
           await this.countdownManager.showCountdown();
           await this.showPattern();
           this.canInput = true;
+          
         } catch (error) {
           console.error('Error in handleFailure:', error);
           this.canInput = true;
