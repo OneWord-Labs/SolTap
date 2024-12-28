@@ -13,7 +13,6 @@ const __dirname = path.dirname(__filename);
 const DIST_DIR = path.join(__dirname, '../../');
 
 const app = express();
-const router = Router();
 const port = Number(process.env.PORT) || 3001;
 const logger = new Logger('Server');
 
@@ -23,80 +22,20 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
   process.exit(1);
 }
 
+// Initialize services
+const telegramService = TelegramService.getInstance();
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Initialize services
-const telegramService = TelegramService.getInstance();
-
-// Telegram webhook authentication middleware
-const authenticateTelegramWebhook = ((req: Request, res: Response, next: NextFunction) => {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) {
-    logger.error('TELEGRAM_BOT_TOKEN not set');
-    return res.sendStatus(401);
-  }
-
-  // Log the full request for debugging
-  logger.info('Webhook request headers:', req.headers);
-  logger.info('Webhook request body:', req.body);
-
-  // Allow health check endpoint without verification
-  if (req.path === '/health') {
-    return next();
-  }
-
-  next();
-}) as RequestHandler;
-
-// Apply Telegram webhook authentication to all API routes
-router.use(authenticateTelegramWebhook);
-
-// Health check endpoint
-router.get('/health', (async (_req: Request, res: Response) => {
-  try {
-    const health = await telegramService.getHealth();
-    res.json(health);
-  } catch (error: any) {
-    logger.error('Health check failed:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to connect to Telegram',
-      error: error.message
-    });
-  }
-}) as RequestHandler);
-
+// Interface definitions
 interface ScoreUpdateRequest {
   userId: number;
   score: number;
 }
 
-// Score update endpoint
-router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Response) => {
-  const { userId, score } = req.body;
-  
-  if (!userId || typeof score !== 'number') {
-    res.status(400).json({ 
-      error: 'Invalid request body. Required: userId (number) and score (number)' 
-    });
-    return;
-  }
-
-  try {
-    await telegramService.updateScore(userId, score);
-    res.json({ success: true });
-  } catch (error: any) {
-    logger.error('Score update failed:', error);
-    res.status(500).json({ 
-      error: 'Failed to update score',
-      message: error.message 
-    });
-  }
-}) as RequestHandler);
-
-// Mount API routes with webhook endpoint first
+// Telegram webhook endpoint (must be before other routes)
 app.post('/api', async (req, res) => {
   try {
     logger.info('Received webhook request at /api');
@@ -119,8 +58,49 @@ app.post('/api', async (req, res) => {
   }
 });
 
-// Mount other API routes
-app.use('/api', router);
+// API Router setup
+const apiRouter = Router();
+
+// Health check endpoint
+apiRouter.get('/health', async (_req: Request, res: Response) => {
+  try {
+    const health = await telegramService.getHealth();
+    res.json(health);
+  } catch (error: any) {
+    logger.error('Health check failed:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to connect to Telegram',
+      error: error.message
+    });
+  }
+});
+
+// Score update endpoint
+apiRouter.post('/score', async (req: Request<{}, {}, ScoreUpdateRequest>, res: Response) => {
+  const { userId, score } = req.body;
+  
+  if (!userId || typeof score !== 'number') {
+    res.status(400).json({ 
+      error: 'Invalid request body. Required: userId (number) and score (number)' 
+    });
+    return;
+  }
+
+  try {
+    await telegramService.updateScore(userId, score);
+    res.json({ success: true });
+  } catch (error: any) {
+    logger.error('Score update failed:', error);
+    res.status(500).json({ 
+      error: 'Failed to update score',
+      message: error.message 
+    });
+  }
+});
+
+// Mount API routes after webhook
+app.use('/api', apiRouter);
 
 // Serve static files
 app.use(express.static(path.join(DIST_DIR)));
@@ -130,7 +110,7 @@ app.get('*', (_req: Request, res: Response) => {
   // Check if it's a direct browser access without userId parameter
   if (!_req.query.userId) {
     logger.info('Direct browser access detected, redirecting to Telegram bot');
-    return res.redirect(TELEGRAM_CONFIG.botUrl);
+    return res.redirect(302, TELEGRAM_CONFIG.botUrl);
   }
 
   logger.info('Serving index.html for path:', _req.path);
