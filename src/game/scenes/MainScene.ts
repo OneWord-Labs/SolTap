@@ -267,14 +267,13 @@ export class MainScene extends Phaser.Scene {
                 circle.setVisible(this.difficulty === 'novice');
             });
 
-            // Wait before starting countdown
+            // Wait before restarting level
             await new Promise(resolve => this.time.delayedCall(1000, resolve));
             
-            // Show countdown and pattern
-            await this.countdownManager.showCountdown();
-            await this.showPattern();
+            // Restart level with new pattern
+            await this.startNewLevel();
 
-            // Re-enable input
+            // Re-enable input after level restart
             this.isShowingPattern = false;
             this.canInput = true;
         } catch (error) {
