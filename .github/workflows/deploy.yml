@@ -17,14 +17,38 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Debug Environment
+        run: |
+          echo "Node version: $(node -v)"
+          echo "NPM version: $(npm -v)"
+          echo "Working directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          echo "Node modules:"
+          ls -la node_modules
 
       - name: Build
-        run: npm run build
+        run: |
+          echo "Starting build..."
+          npm run build
+          echo "Build complete. Contents of dist:"
+          ls -la dist
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           NODE_ENV: production
+          BASE_URL: https://soltap-v1.vercel.app
+          DEBUG: "*"
+
+      - name: Verify Vercel Configuration
+        run: |
+          echo "Vercel Project ID: ${{ secrets.VERCEL_PROJECT_ID }}"
+          echo "Vercel Org ID: ${{ secrets.VERCEL_ORG_ID }}"
+          echo "Checking if Vercel token exists:"
+          if [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then echo "Token exists"; else echo "Token missing"; fi
 
       - name: Deploy to Vercel
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -33,9 +57,13 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          echo "Installing Vercel CLI..."
           npm i -g vercel
+          echo "Pulling Vercel environment..."
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Building project..."
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Deploying to production..."
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Comment PR
