@@ -35,6 +35,7 @@ import Phaser from 'phaser';
         
         this.rippleEffect = new RippleEffect(scene, x, y);
         this.isActive = false;
+        this.setInactiveState();
         
         if (isExpertMode) {
           this.logger.info('Expert mode circle created, setting invisible');
