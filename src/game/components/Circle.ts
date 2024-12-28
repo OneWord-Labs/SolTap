@@ -94,15 +94,16 @@ import Phaser from 'phaser';
           return;
         }
         this.setActiveState();
-        // Introduce a slight delay before playing the ripple effect
-        this.scene.time.delayedCall(50, () => {
-          if (this.baseCircle.visible) {
-            this.rippleEffect.play(duration)
-              .then(() => {
-                this.setInactiveState();
-              });
-          }
-        });
+        
+        // Play ripple effect
+        await this.rippleEffect.play(duration);
+        
+        // Reset state after animation
+        if (!this.isExpertMode) {
+          this.setInactiveState();
+        } else {
+          this.setVisible(false);
+        }
       }
 
       setExpertModeVisibility(visible: boolean): void {
