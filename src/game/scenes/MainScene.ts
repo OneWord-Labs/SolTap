@@ -282,11 +282,13 @@ import Phaser from 'phaser';
       }
 
       private async handleFailure() {
+        // Disable input and reset state
         this.canInput = false;
         this.isShowingPattern = false;
         
-        // Show failure message
+        // Show failure message and wait
         await this.transitionManager.showFailure();
+        await new Promise(resolve => this.time.delayedCall(1000, resolve));
         
         // Reset game state
         this.playerSequence = [];
@@ -298,17 +300,25 @@ import Phaser from 'phaser';
           this.longPressTimer = null;
         }
         
-        // Reset circles
+        // Reset and hide circles
         this.circles.forEach(circle => {
           circle.hideLongPressIndicator();
-          circle.setVisible(this.difficulty === 'novice');
+          circle.setVisible(false);
           circle.setActiveState(false);
         });
+
+        // Generate new pattern for current level
+        this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
         
-        // Wait before showing countdown
-        await new Promise(resolve => this.time.delayedCall(1500, resolve));
+        // Wait before starting sequence
+        await new Promise(resolve => this.time.delayedCall(1000, resolve));
         
-        // Show countdown and repeat pattern
+        // Show circles if in novice mode
+        if (this.difficulty === 'novice') {
+          this.circles.forEach(circle => circle.setVisible(true));
+        }
+        
+        // Start sequence
         await this.countdownManager.showCountdown();
         await this.showPattern();
         this.canInput = true;
