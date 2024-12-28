@@ -1,4 +1,3 @@
-
 import express from 'express';
 import { TelegramService } from '../services/telegram/telegram.service';
 import { Logger } from '../utils/Logger';
@@ -9,14 +8,8 @@ const logger = new Logger('Server');
 const telegramService = new TelegramService();
 
 app.use(express.json());
-app.use(express.static('dist'));
 
-// Add basic logging middleware
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.path}`);
-  next();
-});
-
+// API routes before static files
 app.get('/api/health', async (req, res) => {
   try {
     const health = await telegramService.getHealth();
@@ -39,6 +32,15 @@ app.post('/api/score', async (req, res) => {
     res.status(500).json({ error: 'Failed to update score' });
   }
 });
+
+app.use(express.static('dist'));
+
+// Add basic logging middleware
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.path}`);
+  next();
+});
+
 
 app.listen(port, '0.0.0.0', () => {
   logger.info(`Server running on port ${port}`);
