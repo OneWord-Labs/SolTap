@@ -292,6 +292,12 @@ import Phaser from 'phaser';
         // Ensure any active long press indicator is hidden
         this.circles.forEach(circle => circle.hideLongPressIndicator());
         
+        // Reset circles visibility
+        this.circles.forEach(circle => circle.setVisible(false));
+        
+        // Generate new pattern for the same level
+        this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
+        
         await this.countdownManager.showCountdown();
         await this.showPattern();
         this.canInput = true;
