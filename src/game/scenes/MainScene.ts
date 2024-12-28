@@ -283,21 +283,28 @@ import Phaser from 'phaser';
 
       private async handleFailure() {
         this.canInput = false;
+        this.isShowingPattern = false;
         await this.transitionManager.showFailure();
+        
+        // Reset game state
         this.playerSequence = [];
-        // Reset long press variables
         this.isLongPressing = false;
         this.longPressIndex = -1;
+        if (this.longPressTimer) {
+          this.longPressTimer.destroy();
+          this.longPressTimer = null;
+        }
         
-        // Ensure any active long press indicator is hidden
-        this.circles.forEach(circle => circle.hideLongPressIndicator());
-        
-        // Reset circles visibility
-        this.circles.forEach(circle => circle.setVisible(false));
+        // Reset circles
+        this.circles.forEach(circle => {
+          circle.hideLongPressIndicator();
+          circle.setVisible(false);
+        });
         
         // Generate new pattern for the same level
         this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
         
+        // Show countdown and replay pattern
         await this.countdownManager.showCountdown();
         await this.showPattern();
         this.canInput = true;
