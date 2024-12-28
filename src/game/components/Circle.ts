@@ -27,14 +27,14 @@ import Phaser from 'phaser';
         this.baseCircle = scene.add.circle(x, y, this.radius);
         this.baseCircle.setDepth(2);
         this.baseCircle.setStrokeStyle(3, COLORS.secondary);
+        this.baseCircle.setFillStyle(COLORS.secondary, 0.1);
         
         this.innerCircle = scene.add.circle(x, y, 22);
         this.innerCircle.setDepth(3);
+        this.innerCircle.setFillStyle(COLORS.primary, 0.2);
         
         this.rippleEffect = new RippleEffect(scene, x, y);
-
-        // Set initial state
-        this.setInactiveState();
+        this.isActive = false;
         
         if (isExpertMode) {
           this.logger.info('Expert mode circle created, setting invisible');
