@@ -13,6 +13,7 @@ import { HitDetection } from '../utils/hitDetection';
 import { CountdownManager } from '../utils/CountdownManager';
 import { Logger } from '../../utils/Logger';
 import { Circle } from '../components/Circle';
+import { TelegramGameService } from '../services/TelegramGameService';
 
 export class MainScene extends Phaser.Scene {
     private patterns: Pattern[] = [];
@@ -32,12 +33,14 @@ export class MainScene extends Phaser.Scene {
     private difficulty: DifficultyMode = 'novice';
     private logger: Logger;
     private pointerDownTime: number = 0;
+    private telegramGame: TelegramGameService;
 
     constructor() {
         super({ key: 'MainScene' });
         this.audioManager = new AudioManager();
         this.rewardSystem = new RewardSystem();
         this.logger = new Logger('MainScene');
+        this.telegramGame = new TelegramGameService();
     }
 
     init(data: { difficulty: DifficultyMode, devMode?: boolean, devLevel?: number, longPressEnabled?: boolean }) {
@@ -50,6 +53,7 @@ export class MainScene extends Phaser.Scene {
     }
 
     create() {
+        this.telegramGame.initGame();
         this.setupManagers();
         this.setupEventListeners();
         this.startNewLevel();
