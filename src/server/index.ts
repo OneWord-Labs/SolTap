@@ -53,9 +53,10 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
   const { userId, score } = req.body;
   
   if (!userId || typeof score !== 'number') {
-    return res.status(400).json({ 
+    res.status(400).json({ 
       error: 'Invalid request body. Required: userId (number) and score (number)' 
     });
+    return;
   }
 
   try {
