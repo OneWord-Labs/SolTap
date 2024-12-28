@@ -89,19 +89,20 @@ export class TransitionManager {
       this.overlay.setAlpha(0.7);
       this.levelText.setText('Try Again!');
       this.levelText.setColor('#FF0000');
+      this.levelText.setScale(1);
       
       this.scene.tweens.add({
         targets: this.levelText,
         alpha: 1,
         scale: 1.2,
-        duration: 300,
+        duration: 500,
         onComplete: () => {
-          this.scene.time.delayedCall(800, () => {
+          this.scene.time.delayedCall(1000, () => {
             this.scene.tweens.add({
               targets: [this.overlay, this.levelText],
               alpha: 0,
               scale: 1,
-              duration: 300,
+              duration: 500,
               onComplete: () => {
                 this.levelText.setColor(GAME_CONFIG.levelTextStyle.color);
                 resolve();

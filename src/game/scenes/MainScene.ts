@@ -285,9 +285,8 @@ import Phaser from 'phaser';
         this.canInput = false;
         this.isShowingPattern = false;
         
-        // Show failure message and wait
+        // Show failure message
         await this.transitionManager.showFailure();
-        await new Promise(resolve => this.time.delayedCall(1000, resolve));
         
         // Reset game state
         this.playerSequence = [];
@@ -305,6 +304,9 @@ import Phaser from 'phaser';
           circle.setVisible(this.difficulty === 'novice');
           circle.setActiveState(false);
         });
+        
+        // Wait before showing countdown
+        await new Promise(resolve => this.time.delayedCall(1500, resolve));
         
         // Show countdown and repeat pattern
         await this.countdownManager.showCountdown();
