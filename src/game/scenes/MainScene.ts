@@ -283,16 +283,14 @@ import Phaser from 'phaser';
 
       private async handleFailure() {
         try {
-          // Disable input and reset state
           this.canInput = false;
-          this.isShowingPattern = false;
+          this.isShowingPattern = true;
           this.logger.info('Handling failure, resetting state');
           
-          // Show failure message and wait
+          // Show failure message
           await this.transitionManager.showFailure();
-          await new Promise(resolve => this.time.delayedCall(500, resolve));
           
-          // Reset game state but keep the same patterns
+          // Reset player state
           this.playerSequence = [];
           this.isLongPressing = false;
           this.longPressIndex = -1;
@@ -302,27 +300,25 @@ import Phaser from 'phaser';
             this.longPressTimer = null;
           }
           
-          // Reset circles
+          // Wait a moment before showing pattern again
+          await new Promise(resolve => this.time.delayedCall(1000, resolve));
+          
+          // Reset and prepare circles
           this.circles.forEach(circle => {
             circle.hideLongPressIndicator();
             circle.setActiveState(false);
+            circle.setVisible(this.difficulty === 'novice');
           });
           
-          // Show circles if in novice mode
-          if (this.difficulty === 'novice') {
-            this.circles.forEach(circle => circle.setVisible(true));
-          } else {
-            this.circles.forEach(circle => circle.setVisible(false));
-          }
-          
-          this.logger.info('Showing pattern again after failure:', this.patterns);
-          // Show countdown and pattern again
-          await this.countdownManager.showCountdown();
+          this.logger.info('Replaying pattern after failure:', this.patterns);
+          // Show pattern again
           await this.showPattern();
+          this.isShowingPattern = false;
           this.canInput = true;
           
         } catch (error) {
           console.error('Error in handleFailure:', error);
+          this.isShowingPattern = false;
           this.canInput = true;
         }
       }
