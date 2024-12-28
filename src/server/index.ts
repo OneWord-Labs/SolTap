@@ -1,47 +1,55 @@
+
 import express from 'express';
 import { TelegramService } from '../services/telegram/telegram.service';
 import { Logger } from '../utils/Logger';
+import { createServer as createViteServer } from 'vite';
 
 const app = express();
 const port = 3000;
 const logger = new Logger('Server');
 const telegramService = new TelegramService();
 
-app.use(express.json());
+async function startServer() {
+  app.use(express.json());
 
-// API routes before static files
-app.get('/api/health', async (req, res) => {
-  try {
-    const health = await telegramService.getHealth();
-    res.json(health);
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to connect to Telegram',
-      error: error.message
-    });
-  }
-});
+  // Create Vite server in middleware mode
+  const vite = await createViteServer({
+    server: { middlewareMode: true },
+    appType: 'spa'
+  });
 
-app.post('/api/score', async (req, res) => {
-  const { userId, score } = req.body;
-  try {
-    await telegramService.updateScore(userId, score);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to update score' });
-  }
-});
+  // API routes before any static file handling
+  app.get('/api/health', async (req, res) => {
+    try {
+      const health = await telegramService.getHealth();
+      res.json(health);
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to connect to Telegram',
+        error: error.message
+      });
+    }
+  });
 
-app.use(express.static('dist'));
+  app.post('/api/score', async (req, res) => {
+    const { userId, score } = req.body;
+    try {
+      await telegramService.updateScore(userId, score);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update score' });
+    }
+  });
 
-// Add basic logging middleware
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.path}`);
-  next();
-});
+  // Use vite's connect instance as middleware
+  app.use(vite.middlewares);
 
+  app.listen(port, '0.0.0.0', () => {
+    logger.info(`Server running on port ${port}`);
+  });
+}
 
-app.listen(port, '0.0.0.0', () => {
-  logger.info(`Server running on port ${port}`);
+startServer().catch((err) => {
+  logger.error('Error starting server:', err);
 });
