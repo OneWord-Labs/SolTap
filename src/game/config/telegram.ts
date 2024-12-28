@@ -7,6 +7,6 @@
  */
 export const TELEGRAM_CONFIG = {
   botToken: process.env.TELEGRAM_BOT_TOKEN || '',
-  gameShortName: 'soltap',  // Must match the short name set in @BotFather
+  gameShortName: 'solsays',  // Must match the short name set in @BotFather
   webAppUrl: process.env.WEBAPP_URL || '',
 };
