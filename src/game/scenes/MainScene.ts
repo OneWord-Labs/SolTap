@@ -243,33 +243,45 @@ export class MainScene extends Phaser.Scene {
     }
 
     private async handleFailure() {
-        this.canInput = false;
-        this.isShowingPattern = true;
+        try {
+            this.canInput = false;
+            this.isShowingPattern = true;
 
-        // Show failure message
-        await this.transitionManager.showFailure();
+            // Show failure message
+            await this.transitionManager.showFailure();
+            
+            // Reset player state
+            this.playerSequence = [];
+            this.isLongPressing = false;
+            this.longPressIndex = -1;
+            
+            if (this.longPressTimer) {
+                this.longPressTimer.destroy();
+                this.longPressTimer = null;
+            }
 
-        // Reset all game state
-        this.playerSequence = [];
-        
+            // Reset circles
+            this.circles.forEach(circle => {
+                circle.hideLongPressIndicator();
+                circle.setActiveState(false);
+                circle.setVisible(this.difficulty === 'novice');
+            });
 
-        // Reset circles
-        this.circles.forEach(circle => {
-            circle.hideLongPressIndicator();
-            circle.setActiveState(false);
-            circle.setVisible(this.difficulty === 'novice');
-        });
+            // Wait before starting countdown
+            await new Promise(resolve => this.time.delayedCall(1000, resolve));
+            
+            // Show countdown and pattern
+            await this.countdownManager.showCountdown();
+            await this.showPattern();
 
-        // Show countdown
-        await this.countdownManager.showCountdown();
-
-        // Show pattern again
-        this.logger.info('Replaying pattern:', this.patterns);
-        await this.showPattern();
-
-        // Enable input
-        this.isShowingPattern = false;
-        this.canInput = true;
+            // Re-enable input
+            this.isShowingPattern = false;
+            this.canInput = true;
+        } catch (error) {
+            console.error('Error in handleFailure:', error);
+            this.isShowingPattern = false;
+            this.canInput = true;
+        }
     }
 
     private async handleTryAgain() {
