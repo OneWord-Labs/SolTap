@@ -1,0 +1,88 @@
+Below is a common fix if you want the entire level to truly restart after a failure, rather than just replaying the old pattern. The main issue is that in your current handleFailure method, you never call startNewLevel(). As a result, the code simply re-shows the existing pattern—so it may appear not to restart.
+
+Why startNewLevel() Matters
+
+Your startNewLevel() method does the following crucial things:
+	1.	Generates a new pattern via PatternGenerator.generate(...).
+	2.	Resets the player’s sequence and locks input until the new pattern is shown.
+	3.	Updates the UI with the current level and tokens.
+	4.	Calls this.showPattern() and re-enables input afterward.
+
+If your goal on failure is to re-generate the pattern (effectively “restart the level”)—you must call startNewLevel(). Right now, handleFailure() just:
+
+// Old code in handleFailure
+await this.countdownManager.showCountdown();
+await this.showPattern();
+
+That replays the existing pattern array (this.patterns) you had before failing, meaning it isn’t truly “restarting.”
+
+How to Fix: Call startNewLevel()
+
+One straightforward fix is to remove (or comment out) the lines that do showCountdown() and showPattern() directly, and replace them with a call to startNewLevel(). For example:
+
+private async handleFailure() {
+    try {
+        this.canInput = false;
+        this.isShowingPattern = true;
+
+        // Show failure message (some UI transition)
+        await this.transitionManager.showFailure();
+        
+        // Reset player state
+        this.playerSequence = [];
+        this.isLongPressing = false;
+        this.longPressIndex = -1;
+        
+        if (this.longPressTimer) {
+            this.longPressTimer.destroy();
+            this.longPressTimer = null;
+        }
+
+        // Reset circle visuals
+        this.circles.forEach(circle => {
+            circle.hideLongPressIndicator();
+            circle.setActiveState(false);
+            circle.setVisible(this.difficulty === 'novice');
+        });
+
+        // A short delay so the failure message is visible
+        await new Promise(resolve => this.time.delayedCall(1000, resolve));
+        
+        // ►► Instead of manually re-showing the pattern,
+        // call startNewLevel to truly regenerate everything:
+        await this.startNewLevel();
+
+        // Re-enable after the new level has been set up
+        this.isShowingPattern = false;
+        this.canInput = true;
+
+    } catch (error) {
+        console.error('Error in handleFailure:', error);
+        this.isShowingPattern = false;
+        this.canInput = true;
+    }
+}
+
+What This Does
+	1.	Shows the failure UI and delays briefly.
+	2.	Clears any long-press timers, circle states, etc.
+	3.	Calls this.startNewLevel(), which:
+	•	Resets patterns by calling PatternGenerator.generate(...).
+	•	Updates UI (level, tokens).
+	•	Shows the newly generated pattern.
+	4.	Re-enables input only after the level is set.
+
+Now your failed level will really restart: you get a fresh pattern, the UI is consistent, and the scene behaves like it does on first creation.
+
+If You Need the Same Pattern Instead
+
+If you want to replay the identical pattern (rather than generate a brand-new one), you can do one of two things:
+	1.	Store the original pattern in some variable before playing it. Then restore that pattern in handleFailure().
+	2.	Skip the line this.patterns = PatternGenerator.generate(...) inside startNewLevel(), or replace it with your own logic.
+
+But usually you’ll want the fresh pattern so the level feels “restarted.” Hence, using startNewLevel() is the most common fix.
+
+Summary
+	•	The core issue is that handleFailure() never calls startNewLevel(), so it just replays the old pattern.
+	•	Replace the manual lines that call this.showPattern() with a call to this.startNewLevel().
+	•	This ensures the entire level logic resets (including pattern generation, UI updates, etc.).
