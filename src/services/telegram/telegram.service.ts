@@ -45,8 +45,17 @@ export class TelegramService {
 
       this.bot.on('polling_error', (error: TelegramError) => {
         if (error.code === 'ETELEGRAM' && error.response?.statusCode === 409) {
-          this.logger.warn('Polling conflict detected, retrying in 10 seconds...');
-          setTimeout(() => this.initializeBot(), 10000);
+          this.logger.warn('Polling conflict detected, stopping current polling...');
+          this.bot.stopPolling()
+            .then(() => {
+              this.logger.info('Polling stopped, waiting before retry...');
+              setTimeout(() => {
+                this.logger.info('Retrying bot initialization...');
+                this.bot.startPolling()
+                  .catch(err => this.logger.error('Error restarting polling:', err));
+              }, 5000);
+            })
+            .catch(err => this.logger.error('Error stopping polling:', err));
         } else {
           this.logger.error('Telegram Polling Error:', error);
         }
