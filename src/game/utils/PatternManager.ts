@@ -37,7 +37,8 @@ import Phaser from 'phaser';
             circle.setExpertModeVisibility(true); // Show circle in expert mode
           }
       
-          circle.activate(pattern.type === 'hold' ? pattern.duration || 500 : 500); // Activate with proper duration
+          const duration = pattern.type === 'hold' ? (pattern.duration || 500) : 500;
+          circle.activate(duration);
       
           await Promise.all([
             soundPromise,

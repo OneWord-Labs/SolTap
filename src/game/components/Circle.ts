@@ -22,28 +22,20 @@ import Phaser from 'phaser';
         this.x = x;
         this.y = y;
         this.radius = 25;
+        this.isActive = false;
 
-        // Create visible circles
+        // Create circles in inactive state
         this.baseCircle = scene.add.circle(x, y, this.radius);
         this.baseCircle.setDepth(2);
-        this.baseCircle.setStrokeStyle(3, COLORS.secondary);
-        this.baseCircle.setFillStyle(COLORS.secondary, 0.1);
-        
         this.innerCircle = scene.add.circle(x, y, 22);
         this.innerCircle.setDepth(3);
-        this.innerCircle.setFillStyle(COLORS.primary, 0.2);
-        
         this.rippleEffect = new RippleEffect(scene, x, y);
-        this.isActive = false;
-        this.setInactiveState();
         
-        if (isExpertMode) {
-          this.logger.info('Expert mode circle created, setting invisible');
-          this.setVisible(false);
-        } else {
-          this.logger.info('Novice mode circle created, setting visible');
-          this.setVisible(true);
-        }
+        // Initialize state
+        this.setInactiveState();
+        this.setVisible(!isExpertMode);
+        
+        this.logger.info(`${isExpertMode ? 'Expert' : 'Novice'} mode circle created, setting ${isExpertMode ? 'invisible' : 'visible'}`);
 
         this.setupInputHandlers();
       }
