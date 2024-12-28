@@ -285,32 +285,24 @@ import Phaser from 'phaser';
         this.canInput = false;
         this.isShowingPattern = false;
         
-        // Show failure message
         await this.transitionManager.showFailure();
         
-        // Reset all game state
         this.playerSequence = [];
         this.isLongPressing = false;
         this.longPressIndex = -1;
+        
         if (this.longPressTimer) {
           this.longPressTimer.destroy();
           this.longPressTimer = null;
         }
         
-        // Reset and hide all circles
         this.circles.forEach(circle => {
           circle.hideLongPressIndicator();
-          circle.setVisible(false);
+          circle.setVisible(this.difficulty === 'novice');
           circle.setActiveState(false);
         });
         
-        // Wait a moment before showing countdown
-        await new Promise(resolve => this.scene.time.delayedCall(1000, resolve));
-        
-        // Generate new pattern for the same level
         this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
-        
-        // Show countdown and replay pattern
         await this.countdownManager.showCountdown();
         await this.showPattern();
         this.canInput = true;

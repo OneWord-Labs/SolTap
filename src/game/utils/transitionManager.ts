@@ -86,17 +86,26 @@ export class TransitionManager {
 
   showFailure(): Promise<void> {
     return new Promise((resolve) => {
+      this.overlay.setAlpha(0.7);
       this.levelText.setText('Try Again!');
       this.levelText.setColor('#FF0000');
       
       this.scene.tweens.add({
         targets: this.levelText,
         alpha: 1,
-        duration: 300,
-        yoyo: true,
+        duration: 500,
         onComplete: () => {
-          this.levelText.setColor(GAME_CONFIG.levelTextStyle.color);
-          resolve();
+          this.scene.time.delayedCall(1000, () => {
+            this.scene.tweens.add({
+              targets: [this.overlay, this.levelText],
+              alpha: 0,
+              duration: 500,
+              onComplete: () => {
+                this.levelText.setColor(GAME_CONFIG.levelTextStyle.color);
+                resolve();
+              }
+            });
+          });
         }
       });
     });
