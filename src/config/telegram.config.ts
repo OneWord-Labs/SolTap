@@ -10,7 +10,7 @@ const telegramConfigSchema = z.object({
 import { getBaseUrl } from './urls.config';
 
 export const TELEGRAM_CONFIG = {
-  botToken: process.env.SOLTAP_TELEGRAM_BOT_TOKEN || '',
+  botToken: process.env.TELEGRAM_BOT_TOKEN || '',
   gameShortName: 'solsays',
   webAppUrl: getBaseUrl(),
   botUrl: 'https://t.me/SolSays_bot',
