@@ -13,4 +13,11 @@ export const TELEGRAM_CONFIG = {
   webAppUrl: process.env.WEBAPP_URL || '',
 };
 
+try {
+  telegramConfigSchema.parse(TELEGRAM_CONFIG);
+} catch (error) {
+  console.error('Invalid Telegram configuration:', error);
+  process.exit(1);
+}
+
 export type TelegramConfig = z.infer<typeof telegramConfigSchema>;
