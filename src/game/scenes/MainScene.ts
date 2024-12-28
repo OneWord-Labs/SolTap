@@ -262,7 +262,6 @@ export class MainScene extends Phaser.Scene {
 
             // Reset circles
             this.circles.forEach(circle => {
-                circle.hideLongPressIndicator();
                 circle.setActiveState(false);
                 circle.setVisible(this.difficulty === 'novice');
             });
