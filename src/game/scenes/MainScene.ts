@@ -305,9 +305,6 @@ import Phaser from 'phaser';
             circle.hideLongPressIndicator();
             circle.setActiveState(false);
           });
-
-          // Generate new pattern for current level
-          this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
           
           // Show circles if in novice mode
           if (this.difficulty === 'novice') {
@@ -316,7 +313,7 @@ import Phaser from 'phaser';
             this.circles.forEach(circle => circle.setVisible(false));
           }
           
-          // Start sequence with proper timing
+          // Start sequence with proper timing and show same pattern again
           await this.countdownManager.showCountdown();
           await this.showPattern();
           this.canInput = true;
