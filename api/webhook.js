@@ -1,17 +1,17 @@
-const express = require('express');
-const serverless = require('serverless-http');
 const TelegramBot = require('node-telegram-bot-api');
-
-const app = express();
-app.use(express.json());
 
 // Initialize bot
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
 const gameShortName = 'solsays';
 const webAppUrl = process.env.BASE_URL || 'https://play.soltap.xyz';
 
-// Webhook handler
-app.post('/api/webhook', async (req, res) => {
+// Export the handler function
+module.exports = async (req, res) => {
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
     console.log('Received webhook request:', {
       headers: req.headers,
@@ -43,14 +43,11 @@ app.post('/api/webhook', async (req, res) => {
       }
     }
 
-    // Always respond with 200 OK immediately
-    res.status(200).json({ ok: true });
+    // Always respond with 200 OK
+    return res.status(200).json({ ok: true });
   } catch (error) {
     console.error('Error in webhook handler:', error);
     // Still send 200 OK to Telegram
-    res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true });
   }
-});
-
-// Export handler
-module.exports = serverless(app); 
+}; 
