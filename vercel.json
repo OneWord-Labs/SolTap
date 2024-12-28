@@ -1,15 +1,33 @@
 {
   "version": 2,
-  "functions": {
-    "api/webhook.js": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "api/webhook.js",
+      "use": "@vercel/node@3.0.0"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "dist/server/index.js",
+      "use": "@vercel/node@3.0.0",
+      "config": {
+        "includeFiles": [
+          "dist/**",
+          "package.json"
+        ]
+      }
     }
-  },
+  ],
   "routes": [
     {
       "src": "/api/webhook",
       "methods": ["POST"],
-      "dest": "/api/webhook"
+      "dest": "/api/webhook.js"
     },
     {
       "src": "/api/(.*)",
