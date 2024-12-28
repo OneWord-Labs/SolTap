@@ -32,10 +32,6 @@ export class MainScene extends Phaser.Scene {
     private difficulty: DifficultyMode = 'novice';
     private logger: Logger;
     private pointerDownTime: number = 0;
-    private isLongPressing: boolean = false;
-    private longPressIndex: number = -1;
-    private longPressTolerance: number = 500;
-    private longPressTimer: Phaser.Time.TimerEvent | null = null;
 
     constructor() {
         super({ key: 'MainScene' });
@@ -154,26 +150,7 @@ export class MainScene extends Phaser.Scene {
         }
 
         const currentPattern = this.patterns[this.playerSequence.length];
-        if (currentPattern && currentPattern.type === 'hold' && currentPattern.index === clickedCircleIndex) {
-            this.isLongPressing = true;
-            this.longPressIndex = clickedCircleIndex;
-            this.logger.info(`Long press started for circle index: ${clickedCircleIndex}`);
-            this.circles[clickedCircleIndex].showLongPressIndicator();
-
-            // Cancel any existing long press timer
-            if (this.longPressTimer) {
-                this.longPressTimer.destroy();
-                this.longPressTimer = null;
-            }
-
-            // Start a new long press timer
-            this.longPressTimer = this.time.delayedCall(currentPattern.duration! - this.longPressTolerance, () => {
-                if (this.isLongPressing) {
-                    this.logger.info(`Long press successful for circle index: ${clickedCircleIndex}`);
-                    this.handleCircleClick(clickedCircleIndex, pointer, currentPattern.duration!);
-                }
-            });
-        }
+        
     }
 
     private async handlePointerUp(pointer: Phaser.Input.Pointer) {
@@ -200,23 +177,7 @@ export class MainScene extends Phaser.Scene {
 
         const duration = pointer.upTime - this.pointerDownTime;
 
-        // If it's a long press, check if the pointer up is on the same circle
-        if (this.isLongPressing && this.longPressIndex !== clickedCircleIndex) {
-            this.logger.info('Pointer up on a different circle during long press');
-            this.isLongPressing = false;
-            this.longPressIndex = -1;
-            if (this.longPressTimer) {
-                this.longPressTimer.destroy();
-                this.longPressTimer = null;
-            }
-            return;
-        }
-
-        // Cancel the long press timer if it's a regular click or a short hold
-        if (this.longPressTimer && this.patterns[this.playerSequence.length].type !== 'hold') {
-            this.longPressTimer.destroy();
-            this.longPressTimer = null;
-        }
+        
 
         this.handleCircleClick(clickedCircleIndex, pointer, duration);
     }
@@ -290,13 +251,7 @@ export class MainScene extends Phaser.Scene {
 
         // Reset all game state
         this.playerSequence = [];
-        this.isLongPressing = false;
-        this.longPressIndex = -1;
-
-        if (this.longPressTimer) {
-            this.longPressTimer.destroy();
-            this.longPressTimer = null;
-        }
+        
 
         // Reset circles
         this.circles.forEach(circle => {
