@@ -12,8 +12,11 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -28,6 +31,10 @@ jobs:
           echo "Working directory: $(pwd)"
           echo "Directory contents:"
           ls -la
+          echo "Git status:"
+          git status
+          echo "Git log (last 2 commits):"
+          git log -2 --oneline
           echo "Environment variables (safe):"
           env | grep -v -i "key\|token\|secret\|password"
 
