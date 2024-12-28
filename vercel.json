@@ -4,14 +4,22 @@
   "outputDirectory": "dist",
   "builds": [
     {
-      "src": "package.json",
+      "src": "dist/server/index.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "dist/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/dist/server/index.js"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/dist/assets/$1"
     },
     {
       "handle": "filesystem"
@@ -22,6 +30,7 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "PORT": "3001"
   }
 } 
