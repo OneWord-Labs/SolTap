@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { TelegramService } from '../services/telegram/telegram.service.js';
+import { TELEGRAM_CONFIG } from '../config/telegram.config.js';
 import { Logger } from '../utils/Logger.js';
 import crypto from 'crypto';
 
@@ -115,6 +116,12 @@ app.use(express.static(path.join(DIST_DIR)));
 
 // Handle client-side routing
 app.get('*', (_req: Request, res: Response) => {
+  // Check if it's a direct browser access without userId parameter
+  if (!_req.query.userId) {
+    logger.info('Direct browser access detected, redirecting to Telegram bot');
+    return res.redirect(TELEGRAM_CONFIG.botUrl);
+  }
+
   logger.info('Serving index.html for path:', _req.path);
   res.sendFile(path.join(DIST_DIR, 'index.html'), (err) => {
     if (err) {
