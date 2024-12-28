@@ -1,0 +1,76 @@
+First, let's install the required package. In the Replit shell, run:
+
+bashCopynpm install node-telegram-bot-api
+
+Create a new file called bot.js (or you can put this in index.js if you prefer):
+
+javascriptCopyconst TelegramBot = require('node-telegram-bot-api');
+
+// We'll use environment variables for the token
+const token = process.env.TELEGRAM_BOT_TOKEN;
+const gameShortName = 'solsays';  // This is the short name you set in BotFather
+
+const bot = new TelegramBot(token, {polling: true});
+
+// Log when bot starts
+console.log('Bot server starting...');
+
+// Handle /start command
+bot.onText(/\/start/, (msg) => {
+    console.log('Received /start command from:', msg.chat.id);
+    bot.sendGame(msg.chat.id, gameShortName)
+        .then(() => console.log('Game sent successfully'))
+        .catch(error => console.error('Error sending game:', error));
+});
+
+// Handle callback queries
+bot.on('callback_query', function (query) {
+    console.log('Received callback query:', query.game_short_name);
+    if (query.game_short_name === gameShortName) {
+        const gameUrl = process.env.GAME_URL || 'https://sol-tap-v2-stable.admin1090.repl.co';
+        bot.answerCallbackQuery({
+            callback_query_id: query.id,
+            url: gameUrl
+        }).catch(error => console.error('Error answering callback query:', error));
+    }
+});
+
+// Error handling
+bot.on('error', (error) => {
+    console.error('Bot error:', error);
+});
+
+// Polling error handling
+bot.on('polling_error', (error) => {
+    console.error('Polling error:', error);
+});
+
+In Replit, click on the Tools menu on the left sidebar and select "Secrets". Add these environment variables:
+
+Key: TELEGRAM_BOT_TOKEN
+Value: (Your bot token from BotFather)
+
+
+Also add:
+
+Key: GAME_URL
+Value: https://sol-tap-v2-stable.admin1090.repl.co (or your current game URL)
+
+
+Modify your package.json to include:
+
+jsonCopy{
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.64.0"
+  }
+}
+Could you:
+
+Add these files and configurations
+Share your bot token with me (privately if needed)
+Let me know if you get any errors when running the bot
+
+Then I can help you debug any issues and get the bot responding to /start commands properly.
