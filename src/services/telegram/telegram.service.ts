@@ -1,7 +1,6 @@
-
 import TelegramBot from 'node-telegram-bot-api';
-import { TELEGRAM_CONFIG } from '../../config/telegram.config';
-import { Logger } from '../../utils/Logger';
+import { TELEGRAM_CONFIG } from '../../config/telegram.config.js';
+import { Logger } from '../../utils/Logger.js';
 
 export class TelegramService {
   private bot: TelegramBot;

@@ -1,18 +1,15 @@
-
 import { z } from 'zod';
 
 const telegramConfigSchema = z.object({
   botToken: z.string().min(1),
   gameShortName: z.string().min(1),
-  webAppUrl: z.string().url(),
+  webAppUrl: z.string(),
 });
-
-import { getBaseUrl } from './urls.config';
 
 export const TELEGRAM_CONFIG = {
   botToken: process.env.TELEGRAM_BOT_TOKEN || '',
   gameShortName: 'solsays',
-  webAppUrl: getBaseUrl(),
+  webAppUrl: process.env.BASE_URL || 'http://localhost:3000',
   botUrl: 'https://t.me/SolSays_bot',
 };
 

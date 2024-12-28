@@ -1,25 +1,53 @@
-import React, { useEffect, useRef } from 'react';
-    import Phaser from 'phaser';
-    import { gameConfig } from './game/config';
+import { useEffect, useRef } from 'react';
+import Phaser from 'phaser';
+import { gameConfig } from './game/config';
 
-    function App() {
-      const gameRef = useRef<Phaser.Game | null>(null);
-
-      useEffect(() => {
-        gameRef.current = new Phaser.Game(gameConfig);
-
-        return () => {
-          if (gameRef.current) {
-            gameRef.current.destroy(true);
-          }
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: {
+        ready: () => void;
+        expand: () => void;
+        MainButton: {
+          show: () => void;
+          hide: () => void;
+          setText: (text: string) => void;
+          onClick: (fn: () => void) => void;
         };
-      }, []);
+      };
+    };
+  }
+}
 
-      return (
-        <div className="w-full h-screen bg-black">
-          <div id="game-container" className="w-full h-full" />
-        </div>
-      );
+function App() {
+  const gameRef = useRef<Phaser.Game | null>(null);
+
+  useEffect(() => {
+    // Initialize Telegram WebApp
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
     }
 
-    export default App;
+    // Initialize Phaser game
+    if (!gameRef.current) {
+      gameRef.current = new Phaser.Game({
+        ...gameConfig,
+        parent: 'game-container'
+      });
+    }
+
+    return () => {
+      gameRef.current?.destroy(true);
+      gameRef.current = null;
+    };
+  }, []);
+
+  return (
+    <div className="w-full h-full bg-black">
+      <div id="game-container" className="w-full h-full" />
+    </div>
+  );
+}
+
+export default App;

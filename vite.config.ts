@@ -1,6 +1,8 @@
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+
+// For Node.js types
+/// <reference types="node" />
 
 export default defineConfig({
   plugins: [react()],
@@ -8,18 +10,26 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    host: '0.0.0.0',
+    host: 'localhost',
     port: 3000,
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true
       }
-    },
-    hmr: {
-      clientPort: 443,
-      host: process.env.REPL_SLUG + '.' + process.env.REPL_OWNER + '.repl.co',
-      protocol: 'wss'
+    }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          phaser: ['phaser'],
+          vendor: ['react', 'react-dom']
+        }
+      }
     }
   }
 });
