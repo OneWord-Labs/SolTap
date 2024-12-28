@@ -282,46 +282,48 @@ import Phaser from 'phaser';
       }
 
       private async handleFailure() {
-        // Disable input and reset state
-        this.canInput = false;
-        this.isShowingPattern = false;
-        
-        // Show failure message and wait
-        await this.transitionManager.showFailure();
-        await new Promise(resolve => this.time.delayedCall(1000, resolve));
-        
-        // Reset game state
-        this.playerSequence = [];
-        this.isLongPressing = false;
-        this.longPressIndex = -1;
-        
-        if (this.longPressTimer) {
-          this.longPressTimer.destroy();
-          this.longPressTimer = null;
-        }
-        
-        // Reset and hide circles
-        this.circles.forEach(circle => {
-          circle.hideLongPressIndicator();
-          circle.setVisible(false);
-          circle.setActiveState(false);
-        });
+        try {
+          // Disable input and reset state
+          this.canInput = false;
+          this.isShowingPattern = false;
+          
+          // Show failure message and wait
+          await this.transitionManager.showFailure();
+          
+          // Reset game state
+          this.playerSequence = [];
+          this.isLongPressing = false;
+          this.longPressIndex = -1;
+          
+          if (this.longPressTimer) {
+            this.longPressTimer.destroy();
+            this.longPressTimer = null;
+          }
+          
+          // Reset circles
+          this.circles.forEach(circle => {
+            circle.hideLongPressIndicator();
+            circle.setActiveState(false);
+          });
 
-        // Generate new pattern for current level
-        this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
-        
-        // Wait before starting sequence
-        await new Promise(resolve => this.time.delayedCall(1000, resolve));
-        
-        // Show circles if in novice mode
-        if (this.difficulty === 'novice') {
-          this.circles.forEach(circle => circle.setVisible(true));
+          // Generate new pattern for current level
+          this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
+          
+          // Show circles if in novice mode
+          if (this.difficulty === 'novice') {
+            this.circles.forEach(circle => circle.setVisible(true));
+          } else {
+            this.circles.forEach(circle => circle.setVisible(false));
+          }
+          
+          // Start sequence with proper timing
+          await this.countdownManager.showCountdown();
+          await this.showPattern();
+          this.canInput = true;
+        } catch (error) {
+          console.error('Error in handleFailure:', error);
+          this.canInput = true;
         }
-        
-        // Start sequence
-        await this.countdownManager.showCountdown();
-        await this.showPattern();
-        this.canInput = true;
       }
 
       private async handleTryAgain() {
