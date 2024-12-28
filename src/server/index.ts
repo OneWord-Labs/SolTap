@@ -25,16 +25,26 @@ app.use(express.json());
 app.use(express.static('dist'));
 
 // API health check endpoint
-app.get('/api/ping', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    game: TELEGRAM_CONFIG.gameShortName,
-    telegram: {
-      connected: !!bot.isConnected(),
-      botUsername: bot.botInfo?.username,
-      gameUrl: TELEGRAM_CONFIG.webAppUrl
-    }
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    const botInfo = await bot.getMe();
+    res.json({
+      status: 'ok',
+      game: TELEGRAM_CONFIG.gameShortName,
+      telegram: {
+        connected: true,
+        botInfo,
+        gameUrl: TELEGRAM_CONFIG.webAppUrl,
+        botToken: TELEGRAM_CONFIG.botToken ? '✓ Set' : '✗ Missing'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to connect to Telegram',
+      error: error.message
+    });
+  }
 });
 
 bot.onText(/\/start/, (msg) => {
