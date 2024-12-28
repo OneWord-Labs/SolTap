@@ -4,7 +4,7 @@ import { TelegramService } from '../services/telegram/telegram.service';
 import { Logger } from '../utils/Logger';
 
 const app = express();
-const port = 3001; // Changed to different port
+const port = 3001;
 const logger = new Logger('Server');
 const telegramService = new TelegramService();
 
@@ -15,7 +15,7 @@ app.get('/api/health', async (req, res) => {
   try {
     const health = await telegramService.getHealth();
     res.json(health);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       status: 'error',
       message: 'Failed to connect to Telegram',
@@ -35,5 +35,5 @@ app.post('/api/score', async (req, res) => {
 });
 
 app.listen(port, '0.0.0.0', () => {
-  logger.info(`API Server running on port ${port}`);
+  logger.info(`API Server running at http://0.0.0.0:${port}`);
 });
