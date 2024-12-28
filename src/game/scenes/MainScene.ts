@@ -300,9 +300,6 @@ import Phaser from 'phaser';
             this.longPressTimer = null;
           }
           
-          // Wait a moment before showing pattern again
-          await new Promise(resolve => this.time.delayedCall(1000, resolve));
-          
           // Reset and prepare circles
           this.circles.forEach(circle => {
             circle.hideLongPressIndicator();
@@ -310,8 +307,10 @@ import Phaser from 'phaser';
             circle.setVisible(this.difficulty === 'novice');
           });
           
+          // Show countdown before replaying pattern
+          await this.countdownManager.showCountdown();
+          
           this.logger.info('Replaying pattern after failure:', this.patterns);
-          // Show pattern again
           await this.showPattern();
           this.isShowingPattern = false;
           this.canInput = true;
