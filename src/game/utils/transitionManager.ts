@@ -93,13 +93,15 @@ export class TransitionManager {
       this.scene.tweens.add({
         targets: this.levelText,
         alpha: 1,
-        duration: 500,
+        scale: 1.2,
+        duration: 300,
         onComplete: () => {
-          this.scene.time.delayedCall(1000, () => {
+          this.scene.time.delayedCall(800, () => {
             this.scene.tweens.add({
               targets: [this.overlay, this.levelText],
               alpha: 0,
-              duration: 500,
+              scale: 1,
+              duration: 300,
               onComplete: () => {
                 this.levelText.setColor(GAME_CONFIG.levelTextStyle.color);
                 resolve();
