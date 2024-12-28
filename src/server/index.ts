@@ -97,7 +97,7 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
 }) as RequestHandler);
 
 // Mount API routes with webhook endpoint first
-app.post('/api', (async (req: Request, res: Response, next: NextFunction) => {
+app.post('/api', async (req, res) => {
   try {
     logger.info('Received webhook request at /api');
     logger.info('Request headers:', req.headers);
@@ -105,7 +105,8 @@ app.post('/api', (async (req: Request, res: Response, next: NextFunction) => {
     
     if (!req.body) {
       logger.error('No request body received');
-      return res.sendStatus(400);
+      res.sendStatus(400);
+      return;
     }
 
     await telegramService.handleUpdate(req.body);
@@ -114,9 +115,9 @@ app.post('/api', (async (req: Request, res: Response, next: NextFunction) => {
   } catch (error: any) {
     logger.error('Error handling webhook update:', error);
     logger.error('Error stack:', error.stack);
-    next(error);
+    res.sendStatus(500);
   }
-}) as RequestHandler);
+});
 
 // Mount other API routes
 app.use('/api', router);
