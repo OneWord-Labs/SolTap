@@ -2,26 +2,61 @@ import TelegramBot from 'node-telegram-bot-api';
 import { TELEGRAM_CONFIG } from '../../config/telegram.config.js';
 import { Logger } from '../../utils/Logger.js';
 
+interface TelegramError extends Error {
+  code?: string;
+  response?: {
+    statusCode?: number;
+  };
+}
+
 export class TelegramService {
   private bot: TelegramBot;
   private logger: Logger;
+  private static instance: TelegramService;
 
-  constructor() {
+  private constructor() {
     this.logger = new Logger('TelegramService');
-    this.bot = new TelegramBot(TELEGRAM_CONFIG.botToken, { polling: true });
+    const options: TelegramBot.ConstructorOptions = {
+      polling: process.env.NODE_ENV !== 'production',
+      webHook: process.env.NODE_ENV === 'production' ? {
+        port: Number(process.env.PORT) || 3001
+      } : undefined
+    };
+
+    this.bot = new TelegramBot(TELEGRAM_CONFIG.botToken, options);
     this.initializeBot();
   }
 
-  private initializeBot() {
-    this.bot.on('error', (error) => {
-      this.logger.error('Telegram Bot Error:', error);
-    });
+  public static getInstance(): TelegramService {
+    if (!TelegramService.instance) {
+      TelegramService.instance = new TelegramService();
+    }
+    return TelegramService.instance;
+  }
 
-    this.bot.on('polling_error', (error) => {
-      this.logger.error('Telegram Polling Error:', error);
-    });
+  private async initializeBot() {
+    try {
+      // Clear any existing webhook or polling state
+      await this.bot.deleteWebHook();
+      
+      this.bot.on('error', (error) => {
+        this.logger.error('Telegram Bot Error:', error);
+      });
 
-    this.setupCommands();
+      this.bot.on('polling_error', (error: TelegramError) => {
+        if (error.code === 'ETELEGRAM' && error.response?.statusCode === 409) {
+          this.logger.warn('Polling conflict detected, retrying in 10 seconds...');
+          setTimeout(() => this.initializeBot(), 10000);
+        } else {
+          this.logger.error('Telegram Polling Error:', error);
+        }
+      });
+
+      this.setupCommands();
+    } catch (error) {
+      this.logger.error('Error initializing bot:', error);
+      throw error;
+    }
   }
 
   private setupCommands() {

@@ -20,7 +20,7 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize services
-const telegramService = new TelegramService();
+const telegramService = TelegramService.getInstance();
 
 // Health check endpoint
 router.get('/health', (async (_req: Request, res: Response) => {
