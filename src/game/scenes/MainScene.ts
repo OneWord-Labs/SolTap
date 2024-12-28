@@ -286,6 +286,8 @@ import Phaser from 'phaser';
           this.canInput = false;
           this.isShowingPattern = true;
           this.logger.info('Handling failure, resetting state');
+          this.logger.info('Current patterns:', this.patterns);
+          this.logger.info('Player sequence:', this.playerSequence);
           
           // Show failure message
           await this.transitionManager.showFailure();
@@ -308,9 +310,11 @@ import Phaser from 'phaser';
           });
           
           // Show countdown before replaying pattern
+          this.logger.info('Starting countdown before pattern replay');
           await this.countdownManager.showCountdown();
           
-          this.logger.info('Replaying pattern after failure:', this.patterns);
+          this.logger.info('Replaying pattern after failure. Pattern length:', this.patterns.length);
+          this.logger.info('Pattern details:', this.patterns);
           await this.showPattern();
           this.isShowingPattern = false;
           this.canInput = true;
