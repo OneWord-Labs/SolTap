@@ -98,23 +98,37 @@ export class TelegramService {
 
   async handleUpdate(update: TelegramBot.Update): Promise<void> {
     try {
-      this.logger.info('Processing update:', update);
+      this.logger.info('Processing update:', JSON.stringify(update, null, 2));
       
       // Handle /start command
       if (update.message?.text === '/start') {
-        await this.bot.sendGame(update.message.chat.id, TELEGRAM_CONFIG.gameShortName);
-        this.logger.info('Sent game to chat:', update.message.chat.id);
+        this.logger.info('Received /start command from chat:', update.message.chat.id);
+        try {
+          this.logger.info('Attempting to send game with shortName:', TELEGRAM_CONFIG.gameShortName);
+          await this.bot.sendGame(update.message.chat.id, TELEGRAM_CONFIG.gameShortName);
+          this.logger.info('Successfully sent game to chat:', update.message.chat.id);
+        } catch (error: any) {
+          this.logger.error('Failed to send game:', error);
+          this.logger.error('Error stack:', error.stack);
+          await this.bot.sendMessage(update.message.chat.id, 'Sorry, there was an error starting the game. Error: ' + error.message);
+        }
+      } else {
+        this.logger.info('Update did not contain /start command:', update.message?.text);
       }
       
       // Handle callback query (when user clicks the game)
       if (update.callback_query?.game_short_name === TELEGRAM_CONFIG.gameShortName) {
+        this.logger.info('Received game callback query from user:', update.callback_query.from.id);
+        const gameUrl = `${TELEGRAM_CONFIG.webAppUrl}?userId=${update.callback_query.from.id}`;
+        this.logger.info('Answering callback query with URL:', gameUrl);
         await this.bot.answerCallbackQuery(update.callback_query.id, {
-          url: `${TELEGRAM_CONFIG.webAppUrl}?userId=${update.callback_query.from.id}`,
+          url: gameUrl,
         });
-        this.logger.info('Answered callback query for user:', update.callback_query.from.id);
+        this.logger.info('Successfully answered callback query for user:', update.callback_query.from.id);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error handling update:', error);
+      this.logger.error('Error stack:', error.stack);
       throw error;
     }
   }
