@@ -97,7 +97,7 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
 }) as RequestHandler);
 
 // Mount API routes with webhook endpoint first
-app.post('/api', (async (req: Request, res: Response) => {
+app.post('/api', (async (req: Request, res: Response, next: NextFunction) => {
   try {
     logger.info('Received webhook request at /api');
     logger.info('Request headers:', req.headers);
@@ -114,7 +114,7 @@ app.post('/api', (async (req: Request, res: Response) => {
   } catch (error: any) {
     logger.error('Error handling webhook update:', error);
     logger.error('Error stack:', error.stack);
-    res.sendStatus(500);
+    next(error);
   }
 }) as RequestHandler);
 
