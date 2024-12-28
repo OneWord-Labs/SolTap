@@ -1,12 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "ESNext",
     "outDir": "dist/server",
     "target": "ES2020",
     "lib": ["ES2020"],
     "isolatedModules": true,
-    "noEmit": false
+    "noEmit": false,
+    "esModuleInterop": true,
+    "moduleResolution": "node"
   },
   "include": ["src/server/**/*", "src/services/**/*", "src/config/**/*", "src/utils/**/*"],
   "exclude": ["node_modules"]
