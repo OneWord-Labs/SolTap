@@ -24,7 +24,6 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(DIST_DIR));
 
 // Initialize services
 const telegramService = TelegramService.getInstance();
@@ -74,15 +73,25 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
 // Mount API routes
 app.use('/api', router);
 
-// Serve index.html for all other routes
+// Serve static files
+app.use(express.static(path.join(DIST_DIR)));
+
+// Handle client-side routing
 app.get('*', (_req: Request, res: Response) => {
-  res.sendFile(path.join(DIST_DIR, 'index.html'));
+  logger.info('Serving index.html for path:', _req.path);
+  res.sendFile(path.join(DIST_DIR, 'index.html'), (err) => {
+    if (err) {
+      logger.error('Error sending file:', err);
+      res.status(500).send('Error loading page');
+    }
+  });
 });
 
 // Start server
 const server = app.listen(port, '0.0.0.0', () => {
   logger.info(`API Server running at http://0.0.0.0:${port}`);
   logger.info('Environment:', process.env.NODE_ENV);
+  logger.info('Static files directory:', DIST_DIR);
 });
 
 // Handle shutdown gracefully
