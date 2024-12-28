@@ -36,8 +36,16 @@ export class TelegramService {
 
   private async initializeBot() {
     try {
-      // Clear any existing webhook or polling state
-      await this.bot.deleteWebHook();
+      if (process.env.NODE_ENV === 'production') {
+        // In production, use webhooks
+        const webhookUrl = `${TELEGRAM_CONFIG.webAppUrl}/api`;
+        await this.bot.setWebHook(webhookUrl);
+        this.logger.info('Webhook set to:', webhookUrl);
+      } else {
+        // In development, use polling
+        await this.bot.deleteWebHook();
+        this.logger.info('Webhook deleted, using polling');
+      }
       
       this.bot.on('error', (error) => {
         this.logger.error('Telegram Bot Error:', error);
@@ -86,6 +94,29 @@ export class TelegramService {
         });
       }
     });
+  }
+
+  async handleUpdate(update: TelegramBot.Update): Promise<void> {
+    try {
+      this.logger.info('Processing update:', update);
+      
+      // Handle /start command
+      if (update.message?.text === '/start') {
+        await this.bot.sendGame(update.message.chat.id, TELEGRAM_CONFIG.gameShortName);
+        this.logger.info('Sent game to chat:', update.message.chat.id);
+      }
+      
+      // Handle callback query (when user clicks the game)
+      if (update.callback_query?.game_short_name === TELEGRAM_CONFIG.gameShortName) {
+        await this.bot.answerCallbackQuery(update.callback_query.id, {
+          url: `${TELEGRAM_CONFIG.webAppUrl}?userId=${update.callback_query.from.id}`,
+        });
+        this.logger.info('Answered callback query for user:', update.callback_query.from.id);
+      }
+    } catch (error) {
+      this.logger.error('Error handling update:', error);
+      throw error;
+    }
   }
 
   async updateScore(userId: number, score: number): Promise<void> {

@@ -71,6 +71,18 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
   }
 }) as RequestHandler);
 
+// Telegram webhook endpoint
+router.post('/', (async (req: Request, res: Response) => {
+  try {
+    logger.info('Received webhook update:', req.body);
+    await telegramService.handleUpdate(req.body);
+    res.sendStatus(200);
+  } catch (error: any) {
+    logger.error('Error handling webhook update:', error);
+    res.sendStatus(500);
+  }
+}) as RequestHandler);
+
 // Mount API routes
 app.use('/api', router);
 
