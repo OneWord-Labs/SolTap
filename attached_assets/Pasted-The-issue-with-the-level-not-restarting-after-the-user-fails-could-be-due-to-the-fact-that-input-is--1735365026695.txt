@@ -1,0 +1,48 @@
+The issue with the level not restarting after the user fails could be due to the fact that input is locked, and the conditions for transitioning to a new level state are not being met.
+
+In the handleFailure method of the MainScene class, after the failure message is shown through the transitionManager.showFailure() method, you reset the game state and generate a new pattern for the current level. However, make sure that you are properly enabling input again after handling the failure.
+
+Here’s the key part of your handleFailure() method:
+
+private async handleFailure() {
+    // Disable input and reset state
+    this.canInput = false;
+    this.isShowingPattern = false;
+    // Show failure message and wait
+    await this.transitionManager.showFailure();
+    await new Promise(resolve => this.time.delayedCall(1000, resolve));
+    // Reset game state
+    this.playerSequence = [];
+    this.isLongPressing = false;
+    this.longPressIndex = -1;
+    if (this.longPressTimer) {
+        this.longPressTimer.destroy();
+        this.longPressTimer = null;
+    }
+    // Reset and hide circles
+    this.circles.forEach(circle => {
+        circle.hideLongPressIndicator();
+        circle.setVisible(false);
+        circle.setActiveState(false);
+    });
+    // Generate new pattern for current level
+    this.patterns = PatternGenerator.generate(this.currentLevel, GAME_CONFIG.circleCount, this.difficulty);
+    
+    // Wait before starting sequence
+    await new Promise(resolve => this.time.delayedCall(1000, resolve));
+    
+    // Show circles if in novice mode
+    if (this.difficulty === 'novice') {
+        this.circles.forEach(circle => circle.setVisible(true));
+    }
+    // Start sequence
+    await this.countdownManager.showCountdown();
+    await this.showPattern();
+    this.canInput = true; // Ensure input is re-enabled
+}
+Key Changes:
+Ensure that this.canInput is set back to true after the new level's pattern is shown. Since you've already done this, ensure also that there are no blocking calls or conditions that prevent handleFailure() from executing fully.
+
+If everything is structured correctly, check console logs to ensure you're reaching all necessary parts of your failure handling logic. Also, verify that the this.isShowingPattern and this.canInput flags are managed properly within those flows.
+
+If you're still having issues, you may want to add additional debugging messages within handleFailure to ensure that it's being called as expected.
