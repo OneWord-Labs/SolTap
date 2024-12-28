@@ -13,6 +13,7 @@ export const TELEGRAM_CONFIG = {
   botToken: process.env.SOLTAP_TELEGRAM_BOT_TOKEN || '',
   gameShortName: 'solsays',
   webAppUrl: getBaseUrl(),
+  botUrl: 'http://t.me/SolSays_bot',
 };
 
 try {
