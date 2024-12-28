@@ -47,8 +47,14 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-bot.onText(/\/start/, (msg) => {
-  bot.sendGame(msg.chat.id, TELEGRAM_CONFIG.gameShortName);
+bot.onText(/\/start/, async (msg) => {
+  try {
+    await bot.sendGame(msg.chat.id, TELEGRAM_CONFIG.gameShortName);
+    console.log('Sent game to chat:', msg.chat.id);
+  } catch (error) {
+    console.error('Error sending game:', error);
+    await bot.sendMessage(msg.chat.id, 'Sorry, there was an error starting the game.');
+  }
 });
 
 bot.on('callback_query', (query) => {
