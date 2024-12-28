@@ -9,10 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
@@ -24,21 +24,17 @@ jobs:
           echo "Working directory: $(pwd)"
           echo "Directory contents:"
           ls -la
-          echo "Environment variables (sanitized):"
-          env | grep -v -E "TOKEN|KEY|SECRET|PASSWORD"
 
       - name: Install dependencies
         run: |
           echo "Installing dependencies..."
-          npm ci || (echo "npm ci failed" && exit 1)
+          npm ci
           echo "Dependencies installed successfully"
-          echo "Node modules:"
-          ls -la node_modules
 
       - name: Build
         run: |
           echo "Starting build..."
-          npm run build || (echo "Build failed" && exit 1)
+          npm run build
           echo "Build completed successfully"
           echo "Contents of dist directory:"
           ls -la dist || echo "dist directory not found!"
@@ -48,56 +44,11 @@ jobs:
           BASE_URL: https://soltap-v1.vercel.app
           DEBUG: "*"
 
-      - name: Verify Vercel Configuration
-        run: |
-          echo "Checking Vercel configuration..."
-          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
-            echo "Error: VERCEL_PROJECT_ID is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
-            echo "Error: VERCEL_ORG_ID is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
-            echo "Error: VERCEL_TOKEN is not set"
-            exit 1
-          fi
-          echo "Vercel configuration verified successfully"
-
       - name: Deploy to Vercel
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          echo "Installing Vercel CLI..."
-          npm i -g vercel || (echo "Failed to install Vercel CLI" && exit 1)
-          
-          echo "Pulling Vercel environment..."
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} || (echo "Failed to pull Vercel environment" && exit 1)
-          
-          echo "Building project..."
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} || (echo "Vercel build failed" && exit 1)
-          
-          echo "Deploying to production..."
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          if [ $? -eq 0 ]; then
-            echo "Deployment successful! URL: $DEPLOYMENT_URL"
-          else
-            echo "Deployment failed"
-            exit 1
-          fi
-
-      - name: Comment PR
-        uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
+        uses: amondnet/vercel-action@v25
         with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '🚀 Preview deployment available at: https://soltap-v1.vercel.app'
-            }) 
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
+          vercel-args: '--prod' 
