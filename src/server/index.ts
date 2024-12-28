@@ -12,7 +12,15 @@ app.use(express.static('dist'));
 
 // API health check endpoint
 app.get('/api/ping', (req, res) => {
-  res.json({ status: 'ok', game: TELEGRAM_CONFIG.gameShortName });
+  res.json({ 
+    status: 'ok', 
+    game: TELEGRAM_CONFIG.gameShortName,
+    telegram: {
+      connected: !!bot.isConnected(),
+      botUsername: bot.botInfo?.username,
+      gameUrl: TELEGRAM_CONFIG.webAppUrl
+    }
+  });
 });
 
 bot.onText(/\/start/, (msg) => {
