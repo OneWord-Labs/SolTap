@@ -1,10 +1,10 @@
-import { TelegramService } from '../src/services/telegram/telegram.service.js';
-import { Logger } from '../src/utils/Logger.js';
+const { TelegramService } = require('../dist/services/telegram/telegram.service.js');
+const { Logger } = require('../dist/utils/Logger.js');
 
 const logger = new Logger('WebhookAPI');
 const telegramService = TelegramService.getInstance();
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
