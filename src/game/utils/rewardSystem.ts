@@ -17,7 +17,16 @@ export class RewardSystem {
     this.tokenBalance += reward;
     
     if (this.userId) {
-      this.telegramService.updateScore(this.userId, this.tokenBalance);
+      fetch('/score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: this.userId,
+          score: this.tokenBalance
+        })
+      });
     }
     
     return reward;
