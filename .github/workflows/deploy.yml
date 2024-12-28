@@ -5,6 +5,10 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -27,10 +31,13 @@ jobs:
           echo "Environment variables (safe):"
           env | grep -v -i "key\|token\|secret\|password"
 
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
       - name: Install dependencies
         run: |
           echo "Installing dependencies..."
-          npm ci
+          npm ci --verbose
           echo "Dependencies installed successfully"
           echo "node_modules contents:"
           ls -la node_modules | head -n 5
@@ -38,18 +45,10 @@ jobs:
       - name: Verify Vercel Configuration
         run: |
           echo "Verifying Vercel configuration..."
-          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
-            echo "Error: VERCEL_TOKEN is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
-            echo "Error: VERCEL_ORG_ID is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
-            echo "Error: VERCEL_PROJECT_ID is not set"
-            exit 1
-          fi
+          echo "VERCEL_ORG_ID length: ${#VERCEL_ORG_ID}"
+          echo "VERCEL_PROJECT_ID length: ${#VERCEL_PROJECT_ID}"
+          vercel --version
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           echo "Vercel configuration verified successfully"
 
       - name: Build
@@ -68,10 +67,6 @@ jobs:
           DEBUG: "*"
 
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
-          vercel-args: '--prod --debug' 
+        run: |
+          echo "Starting Vercel deployment..."
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --debug 
