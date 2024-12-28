@@ -10,6 +10,11 @@ const bot = new TelegramBot(TELEGRAM_CONFIG.botToken, { polling: true });
 app.use(express.json());
 app.use(express.static('dist'));
 
+// API health check endpoint
+app.get('/api/ping', (req, res) => {
+  res.json({ status: 'ok', game: TELEGRAM_CONFIG.gameShortName });
+});
+
 bot.onText(/\/start/, (msg) => {
   bot.sendGame(msg.chat.id, TELEGRAM_CONFIG.gameShortName);
 });
