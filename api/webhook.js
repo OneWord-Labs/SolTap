@@ -1,30 +1,24 @@
-const { TelegramService } = require('../dist/services/telegram/telegram.service.js');
-const { Logger } = require('../dist/utils/Logger.js');
-
-const logger = new Logger('WebhookAPI');
-const telegramService = TelegramService.getInstance();
-
-module.exports = async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    logger.info('Received webhook request');
-    logger.info('Request headers:', req.headers);
-    logger.info('Request body:', JSON.stringify(req.body, null, 2));
-    
-    if (!req.body) {
-      logger.error('No request body received');
-      return res.status(400).json({ error: 'No request body' });
-    }
+    console.log('Received webhook request:', {
+      headers: req.headers,
+      body: req.body
+    });
 
-    await telegramService.handleUpdate(req.body);
-    logger.info('Successfully processed webhook update');
+    // Send immediate 200 OK response
     res.status(200).json({ ok: true });
+
+    // Process the update asynchronously
+    if (req.body?.message?.text === '/start') {
+      console.log('Received /start command');
+      // Handle /start command
+    }
   } catch (error) {
-    logger.error('Error handling webhook update:', error);
-    logger.error('Error stack:', error.stack);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error in webhook handler:', error);
+    // Already sent 200 OK, just log the error
   }
-} 
+}; 
