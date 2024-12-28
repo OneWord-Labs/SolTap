@@ -96,8 +96,8 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
   }
 }) as RequestHandler);
 
-// Telegram webhook endpoint
-router.post('/', (async (req: Request, res: Response) => {
+// Mount API routes with webhook endpoint first
+app.post('/api', (async (req: Request, res: Response) => {
   try {
     logger.info('Received webhook update:', req.body);
     await telegramService.handleUpdate(req.body);
@@ -108,7 +108,7 @@ router.post('/', (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
-// Mount API routes
+// Mount other API routes
 app.use('/api', router);
 
 // Serve static files
