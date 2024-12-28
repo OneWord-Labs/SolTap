@@ -16,6 +16,7 @@
     "preview": "vite preview",
     "clean": "rimraf dist",
     "prepare:dev": "node scripts/prepare-dev.js",
+    "setup:webhook": "node scripts/setup-webhook.js",
     "deploy": "vercel",
     "deploy:prod": "vercel --prod",
     "deploy:all": "node scripts/deploy.js",

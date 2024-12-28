@@ -70,10 +70,18 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           NODE_ENV: production
-          BASE_URL: https://soltap-v1.vercel.app
+          BASE_URL: https://soltap-v1-onewordlabs.vercel.app
           DEBUG: "*"
 
       - name: Deploy to Vercel
         run: |
           echo "Starting Vercel deployment..."
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --debug 
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --debug
+
+      - name: Setup Telegram Webhook
+        run: |
+          echo "Setting up Telegram webhook..."
+          node scripts/setup-webhook.js
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          BASE_URL: https://soltap-v1-onewordlabs.vercel.app 
