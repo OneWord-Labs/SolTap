@@ -2,7 +2,6 @@
 import express from 'express';
 import TelegramBot from 'node-telegram-bot-api';
 import { TELEGRAM_CONFIG } from '../game/config/telegram';
-import { ViteDevServer } from 'vite';
 
 const app = express();
 const port = 3000;
@@ -11,7 +10,6 @@ const bot = new TelegramBot(TELEGRAM_CONFIG.botToken, { polling: true });
 app.use(express.json());
 app.use(express.static('dist'));
 
-// Telegram bot handlers
 bot.onText(/\/start/, (msg) => {
   bot.sendGame(msg.chat.id, TELEGRAM_CONFIG.gameShortName);
 });
@@ -24,7 +22,6 @@ bot.on('callback_query', (query) => {
   }
 });
 
-// Score update endpoint
 app.post('/api/score', async (req, res) => {
   const { userId, score } = req.body;
   try {
