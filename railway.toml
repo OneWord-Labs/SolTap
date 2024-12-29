@@ -10,5 +10,4 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [variables]
-NODE_ENV = "production"
-TELEGRAM_BOT_TOKEN = "7618469051:AAEvgZv-_qKSUPh6ch1nzeKUDn0DA8wFwFY" 
+NODE_ENV = "production" 
