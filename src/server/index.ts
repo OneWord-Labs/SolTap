@@ -48,13 +48,17 @@ router.post('/webhook', (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
-// Health check endpoint
-router.get('/health', (async (_req: Request, res: Response) => {
+// Health check endpoints
+router.get('/health', (_req: Request, res: Response) => {
+  res.status(200).send('OK');
+});
+
+router.get('/health/details', (async (_req: Request, res: Response) => {
   try {
     const health = await telegramService.getHealth();
     res.json(health);
   } catch (error: any) {
-    logger.error('Health check failed:', error);
+    logger.error('Detailed health check failed:', error);
     res.status(500).json({
       status: 'error',
       message: 'Failed to connect to Telegram',

@@ -118,7 +118,17 @@ export class TelegramService {
 
   async getHealth(): Promise<any> {
     try {
-      const botInfo = await this.bot.getMe();
+      // Create a promise that rejects after 5 seconds
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Telegram health check timed out')), 5000);
+      });
+
+      // Race between the bot.getMe() call and the timeout
+      const botInfo = await Promise.race([
+        this.bot.getMe(),
+        timeoutPromise
+      ]);
+
       return {
         status: 'ok',
         game: TELEGRAM_CONFIG.gameShortName,
@@ -132,8 +142,15 @@ export class TelegramService {
           baseUrl: process.env.BASE_URL || TELEGRAM_CONFIG.webAppUrl || 'https://sol-tap-v2-stable-production.up.railway.app'
         }
       };
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      this.logger.error('Telegram health check failed:', error);
+      return {
+        status: 'error',
+        telegram: {
+          connected: false,
+          error: error.message
+        }
+      };
     }
   }
 
