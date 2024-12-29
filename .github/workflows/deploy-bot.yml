@@ -1,0 +1,40 @@
+name: Deploy Bot to Fly.io
+
+on:
+  push:
+    paths:
+      - 'bot/**'
+      - 'shared/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm run build -w shared
+          npm install -w bot
+
+      - name: Build bot
+        run: npm run build -w bot
+
+      - name: Install Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        working-directory: ./bot
+        run: flyctl deploy --remote-only 

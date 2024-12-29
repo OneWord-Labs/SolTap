@@ -1,66 +1,18 @@
 {
-  "name": "solana-rhythm-game",
+  "name": "sol-tap",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
-  "engines": {
-    "node": "18.x"
-  },
+  "workspaces": [
+    "game",
+    "bot",
+    "shared"
+  ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:server\"",
-    "dev:frontend": "vite",
-    "dev:server": "tsx watch src/server/index.ts",
-    "dev:ngrok": "ngrok http 3001",
-    "build": "npm run clean && npm run build:frontend && npm run build:server && npm run verify",
-    "build:frontend": "tsc && vite build",
-    "build:server": "tsc -p tsconfig.server.json",
-    "verify": "node --loader ts-node/esm scripts/verify-build.js",
-    "start": "node --experimental-specifier-resolution=node dist/server/server/index.js",
-    "start:debug": "DEBUG=app:* node --experimental-specifier-resolution=node dist/server/server/index.js",
-    "start:debug-all": "DEBUG=* node --experimental-specifier-resolution=node dist/server/server/index.js",
-    "preview": "vite preview",
-    "clean": "rimraf dist",
-    "prepare:dev": "node scripts/prepare-dev.js"
-  },
-  "dependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/dotenv": "^8.2.3",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.10.2",
-    "@types/node-telegram-bot-api": "^0.64.0",
-    "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "autoprefixer": "^10.4.18",
-    "cors": "^2.8.5",
-    "debug": "^4.4.0",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "lucide-react": "^0.344.0",
-    "node-telegram-bot-api": "^0.64.0",
-    "phaser": "^3.80.1",
-    "postcss": "^8.4.35",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "rimraf": "^5.0.10",
-    "tailwindcss": "^3.4.1",
-    "tone": "^14.7.77",
-    "tough-cookie": "^4.1.3",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.19.2",
-    "typescript": "^5.5.3",
-    "vite": "^5.4.2",
-    "zod": "^3.24.1"
+    "dev": "concurrently \"npm run dev -w game\" \"npm run dev -w bot\"",
+    "build": "npm run build -w shared && concurrently \"npm run build -w game\" \"npm run build -w bot\"",
+    "clean": "concurrently \"npm run clean -w game\" \"npm run clean -w bot\" \"npm run clean -w shared\""
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.1",
-    "@types/debug": "^4.1.12",
-    "concurrently": "^8.2.2",
-    "eslint": "^9.9.1",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.11",
-    "globals": "^15.9.0",
-    "typescript-eslint": "^8.3.0",
-    "vercel": "^39.2.2"
+    "concurrently": "^8.2.2"
   }
 }

@@ -56,12 +56,7 @@ router.post('/webhook', (async (req: Request, res: Response) => {
 // Health check endpoints
 router.get('/health', (_req: Request, res: Response) => {
   logger.info('Health check request received');
-  res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    service: 'soltap-game',
-    environment: process.env.NODE_ENV || 'production'
-  });
+  res.status(200).send('OK');
 });
 
 router.get('/health/details', (async (_req: Request, res: Response) => {

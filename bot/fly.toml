@@ -1,0 +1,26 @@
+# fly.toml app configuration file generated for sol-tap-v2-stable on 2024-12-29T10:35:46-08:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'sol-tap-v2-stable'
+primary_region = 'lax'
+
+[build]
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3001"
