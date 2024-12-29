@@ -16,6 +16,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
+      "methods": ["GET", "POST"],
       "dest": "dist/server/index.js"
     },
     {
