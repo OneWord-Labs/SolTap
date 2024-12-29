@@ -30,9 +30,14 @@ const telegramService = TelegramService.getInstance();
 
 // Telegram webhook endpoint
 router.post('/webhook', (async (req: Request, res: Response) => {
+  logger.info('Webhook request received');
+  logger.info('Method:', req.method);
+  logger.info('Headers:', req.headers);
+  logger.info('Body:', req.body);
+  
   try {
-    logger.info('Received webhook request:', req.body);
     await telegramService.handleUpdate(req.body);
+    logger.info('Webhook processed successfully');
     res.json({ ok: true });
   } catch (error: any) {
     logger.error('Webhook handling failed:', error);

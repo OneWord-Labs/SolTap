@@ -15,6 +15,11 @@
   ],
   "routes": [
     {
+      "src": "/api/webhook",
+      "methods": ["POST"],
+      "dest": "dist/server/index.js"
+    },
+    {
       "src": "/api/(.*)",
       "methods": ["GET", "POST"],
       "dest": "dist/server/index.js"
