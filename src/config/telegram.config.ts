@@ -10,7 +10,7 @@ export const TELEGRAM_CONFIG = {
   botToken: process.env.TELEGRAM_BOT_TOKEN || '',
   gameShortName: 'solsays',
   webAppUrl: process.env.NODE_ENV === 'production' 
-    ? 'https://play.soltap.xyz'
+    ? 'https://soltap-v2.onrender.com'
     : process.env.BASE_URL || 'http://localhost:3001',
   botUrl: 'https://t.me/SolSays_bot',
 };
