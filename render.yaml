@@ -2,12 +2,18 @@ services:
   - type: web
     name: soltap-v2
     env: node
+    plan: free
+    branch: main
     buildCommand: npm install --production=false && npm run build
     startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: PORT
-        value: 3001 
+        value: 3001
+    domains:
+      - soltap-v2.onrender.com 
