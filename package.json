@@ -11,7 +11,7 @@
     "build": "npm run clean && npm run build:frontend && npm run build:server",
     "build:frontend": "tsc && vite build",
     "build:server": "tsc -p tsconfig.server.json && npm run fix-imports",
-    "fix-imports": "find dist/server -type f -name \"*.js\" -exec sed -i 's/\\(\\.js\\)\\?\\(['\\\"]\\)/\\.js\\2/g' {} +",
+    "fix-imports": "find dist/server -type f -name \"*.js\" -exec sed -i 's/\\(from \\\"\\|require(\\\"\\)\\([^\\\"]*\\)\\(\\\"\\)/\\1\\2.js\\3/g' {} +",
     "start": "NODE_OPTIONS=\"--experimental-specifier-resolution=node\" node dist/server/index.js",
     "preview": "vite preview",
     "clean": "rimraf dist",
