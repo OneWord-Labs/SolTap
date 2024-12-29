@@ -50,19 +50,32 @@ router.post('/webhook', (async (req: Request, res: Response) => {
 
 // Health check endpoints
 router.get('/health', (_req: Request, res: Response) => {
-  res.status(200).send('OK');
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'soltap-game',
+    environment: process.env.NODE_ENV
+  });
 });
 
 router.get('/health/details', (async (_req: Request, res: Response) => {
   try {
     const health = await telegramService.getHealth();
-    res.json(health);
+    res.json({
+      ...health,
+      timestamp: new Date().toISOString(),
+      service: 'soltap-game',
+      environment: process.env.NODE_ENV
+    });
   } catch (error: any) {
     logger.error('Detailed health check failed:', error);
     res.status(500).json({
       status: 'error',
       message: 'Failed to connect to Telegram',
-      error: error.message
+      error: error.message,
+      timestamp: new Date().toISOString(),
+      service: 'soltap-game',
+      environment: process.env.NODE_ENV
     });
   }
 }) as RequestHandler);
