@@ -34,10 +34,8 @@ export class TelegramService {
 
     // Set up webhook only in production
     if (process.env.NODE_ENV === 'production') {
-      const baseUrl = process.env.BASE_URL;
-      if (!baseUrl) {
-        throw new Error('BASE_URL environment variable is required in production');
-      }
+      // Try to get the base URL from various sources
+      const baseUrl = process.env.BASE_URL || TELEGRAM_CONFIG.webAppUrl || 'https://sol-tap-v2-stable-production.up.railway.app';
       const webhookUrl = `${baseUrl}/api/webhook`;
       this.bot.setWebHook(webhookUrl).then(() => {
         this.logger.info('Webhook set successfully:', webhookUrl);
@@ -130,7 +128,8 @@ export class TelegramService {
           gameUrl: TELEGRAM_CONFIG.webAppUrl,
           botToken: TELEGRAM_CONFIG.botToken ? '✓ Set' : '✗ Missing',
           mode: process.env.NODE_ENV === 'production' ? 'webhook' : 'polling',
-          port: process.env.PORT ? Number(process.env.PORT) : 3001
+          port: process.env.PORT ? Number(process.env.PORT) : 3001,
+          baseUrl: process.env.BASE_URL || TELEGRAM_CONFIG.webAppUrl || 'https://sol-tap-v2-stable-production.up.railway.app'
         }
       };
     } catch (error) {
