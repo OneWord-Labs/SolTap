@@ -9,22 +9,34 @@ interface TelegramError extends Error {
   };
 }
 
+const logger = new Logger('TelegramService');
+
+/**
+ * Singleton service for handling Telegram bot operations
+ */
 export class TelegramService {
+  private static instance: TelegramService;
   private bot: TelegramBot;
   private logger: Logger;
-  private static instance: TelegramService;
 
   private constructor() {
-    this.logger = new Logger('TelegramService');
-    const options: TelegramBot.ConstructorOptions = {
-      polling: process.env.NODE_ENV !== 'production',
-      webHook: process.env.NODE_ENV === 'production' ? {
-        port: Number(process.env.PORT) || 3001
-      } : undefined
-    };
+    this.logger = logger;
+    this.bot = new TelegramBot(TELEGRAM_CONFIG.botToken, {
+      webHook: {
+        port: process.env.PORT ? Number(process.env.PORT) : 3001
+      }
+    });
 
-    this.bot = new TelegramBot(TELEGRAM_CONFIG.botToken, options);
-    this.initializeBot();
+    // Set up webhook if in production
+    if (process.env.NODE_ENV === 'production') {
+      const baseUrl = process.env.BASE_URL || 'https://sol-tap-v2-stable-production.up.railway.app';
+      const webhookUrl = `${baseUrl}/api/webhook`;
+      this.bot.setWebHook(webhookUrl).then(() => {
+        this.logger.info('Webhook set successfully:', webhookUrl);
+      }).catch(error => {
+        this.logger.error('Failed to set webhook:', error);
+      });
+    }
   }
 
   public static getInstance(): TelegramService {
