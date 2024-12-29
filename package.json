@@ -16,6 +16,8 @@
     "build:server": "tsc -p tsconfig.server.json",
     "verify": "node --loader ts-node/esm scripts/verify-build.js",
     "start": "node --experimental-specifier-resolution=node dist/server/server/index.js",
+    "start:debug": "DEBUG=app:* node --experimental-specifier-resolution=node dist/server/server/index.js",
+    "start:debug-all": "DEBUG=* node --experimental-specifier-resolution=node dist/server/server/index.js",
     "preview": "vite preview",
     "clean": "rimraf dist",
     "prepare:dev": "node scripts/prepare-dev.js"
@@ -31,6 +33,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
     "cors": "^2.8.5",
+    "debug": "^4.4.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "lucide-react": "^0.344.0",
@@ -51,6 +54,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@types/debug": "^4.1.12",
     "concurrently": "^8.2.2",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
