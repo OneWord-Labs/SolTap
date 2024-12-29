@@ -22,6 +22,11 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 }
 
 // Middleware
+app.use((req, res, next) => {
+  logger.info(`Incoming request: ${req.method} ${req.url}`);
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 
@@ -50,11 +55,12 @@ router.post('/webhook', (async (req: Request, res: Response) => {
 
 // Health check endpoints
 router.get('/health', (_req: Request, res: Response) => {
+  logger.info('Health check request received');
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'soltap-game',
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV || 'production'
   });
 });
 
@@ -126,9 +132,10 @@ app.get('*', (_req: Request, res: Response) => {
 });
 
 // Start server
-const server = app.listen(port, () => {
-  logger.info(`Server running on port ${port}`);
-  logger.info('Environment:', process.env.NODE_ENV);
+const PORT = parseInt(process.env.PORT || '3001', 10);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Server running at http://0.0.0.0:${PORT}`);
+  logger.info('Environment:', process.env.NODE_ENV || 'production');
   logger.info('Static files directory:', DIST_DIR);
 });
 

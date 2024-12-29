@@ -1,5 +1,5 @@
 [build]
-builder = "NIXPACKS"
+builder = "nixpacks"
 buildCommand = "npm run build"
 
 [deploy]
@@ -12,4 +12,5 @@ restartPolicyMaxRetries = 10
 [variables]
 NODE_ENV = "production"
 BASE_URL = "https://sol-tap-v2-stable-production.up.railway.app"
-TELEGRAM_BOT_TOKEN = "7618469051:AAEvgZv-_qKSUPh6ch1nzeKUDn0DA8wFwFY" 
+TELEGRAM_BOT_TOKEN = "7618469051:AAEvgZv-_qKSUPh6ch1nzeKUDn0DA8wFwFY"
+PORT = "3001" 
