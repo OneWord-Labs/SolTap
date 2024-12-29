@@ -3,8 +3,13 @@ services:
     name: soltap-v2
     env: node
     plan: free
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
+    buildCommand: |
+      npm ci
+      npm run build
+      ls -la dist/server
+      echo "Build completed, checking server file..."
+      test -f dist/server/index.js || exit 1
+    startCommand: node dist/server/index.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -12,5 +17,5 @@ services:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: PORT
-        value: 3001
+        value: 10000
     autoDeploy: true 

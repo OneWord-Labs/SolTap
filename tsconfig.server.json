@@ -14,7 +14,14 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": false,
-    "sourceMap": true
+    "sourceMap": true,
+    "declaration": true,
+    "composite": true,
+    "incremental": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifier": true
   },
   "include": ["src/server/**/*", "src/services/**/*", "src/config/**/*", "src/utils/**/*"],
   "exclude": ["node_modules", "dist"]
