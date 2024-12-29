@@ -8,20 +8,13 @@
     "dev:frontend": "vite",
     "dev:server": "tsx watch src/server/index.ts",
     "dev:ngrok": "ngrok http 3001",
-    "build": "npm run clean && npm run build:frontend && npm run build:server && npm run copy-static",
+    "build": "npm run clean && npm run build:frontend && npm run build:server",
     "build:frontend": "tsc && vite build",
-    "build:server": "tsc -p tsconfig.server.json",
-    "copy-static": "cp -r public/* dist/ || true",
+    "build:server": "tsc -p tsconfig.server.json && cp -r src/server/index.js dist/server/",
     "start": "node dist/server/index.js",
     "preview": "vite preview",
     "clean": "rimraf dist",
-    "prepare:dev": "node scripts/prepare-dev.js",
-    "deploy": "vercel",
-    "deploy:prod": "vercel --prod",
-    "deploy:all": "node scripts/deploy.js",
-    "git:setup": "gh repo create sol-tap-v2 --private --source=. --remote=origin",
-    "git:push": "git add . && git commit -m",
-    "git:deploy": "git push -u origin main"
+    "prepare:dev": "node scripts/prepare-dev.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",
