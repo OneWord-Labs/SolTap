@@ -10,7 +10,7 @@
     "dev:ngrok": "ngrok http 3001",
     "build": "npm run clean && npm run build:frontend && npm run build:server",
     "build:frontend": "tsc && vite build",
-    "build:server": "tsc -p tsconfig.server.json && cp -r src/server/index.js dist/server/",
+    "build:server": "tsc -p tsconfig.server.json",
     "start": "node dist/server/index.js",
     "preview": "vite preview",
     "clean": "rimraf dist",
