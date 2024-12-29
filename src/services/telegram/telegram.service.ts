@@ -25,7 +25,7 @@ export class TelegramService {
     // In production, use webhook. In development, use polling.
     const options: TelegramBot.ConstructorOptions = {
       webHook: process.env.NODE_ENV === 'production' ? {
-        port: process.env.PORT ? Number(process.env.PORT) : 3001
+        port: Number(process.env.PORT || 3000)
       } : undefined,
       polling: process.env.NODE_ENV !== 'production'
     };

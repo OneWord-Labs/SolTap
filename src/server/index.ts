@@ -12,7 +12,7 @@ const DIST_DIR = path.join(__dirname, '../../');
 
 const app = express();
 const router = Router();
-const port = Number(process.env.PORT) || 3001;
+const port = process.env.PORT || 3000;
 const logger = new Logger('Server');
 
 // Validate required environment variables
@@ -109,8 +109,8 @@ app.get('*', (_req: Request, res: Response) => {
 });
 
 // Start server
-const server = app.listen(port, '0.0.0.0', () => {
-  logger.info(`API Server running at http://0.0.0.0:${port}`);
+const server = app.listen(port, () => {
+  logger.info(`Server running on port ${port}`);
   logger.info('Environment:', process.env.NODE_ENV);
   logger.info('Static files directory:', DIST_DIR);
 });
