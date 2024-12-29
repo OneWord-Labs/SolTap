@@ -12,7 +12,6 @@ const DIST_DIR = path.join(__dirname, '../../');
 
 const app = express();
 const router = Router();
-const port = process.env.PORT || 3000;
 const logger = new Logger('Server');
 
 // Validate required environment variables
@@ -111,20 +110,6 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
 
 // Mount API routes
 app.use('/api', router);
-
-// Serve static files
-app.use(express.static(path.join(DIST_DIR)));
-
-// Handle client-side routing
-app.get('*', (_req: Request, res: Response) => {
-  logger.info('Serving index.html for path:', _req.path);
-  res.sendFile(path.join(DIST_DIR, 'index.html'), (err) => {
-    if (err) {
-      logger.error('Error sending file:', err);
-      res.status(500).send('Error loading page');
-    }
-  });
-});
 
 // Start server
 const PORT = parseInt(process.env.PORT || '3001', 10);
