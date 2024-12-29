@@ -1,18 +1,17 @@
 import 'dotenv/config';
-import express, { Request, Response, Router, RequestHandler, NextFunction } from 'express';
+import express, { Request, Response, Router, RequestHandler } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { TelegramService } from '../services/telegram/telegram.service.js';
-import { TELEGRAM_CONFIG } from '../config/telegram.config.js';
 import { Logger } from '../utils/Logger.js';
-import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DIST_DIR = path.join(__dirname, '../../');
 
 const app = express();
+const router = Router();
 const port = Number(process.env.PORT) || 3001;
 const logger = new Logger('Server');
 
@@ -22,47 +21,30 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
   process.exit(1);
 }
 
-// Initialize services
-const telegramService = TelegramService.getInstance();
-
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Interface definitions
-interface ScoreUpdateRequest {
-  userId: number;
-  score: number;
-}
+// Initialize services
+const telegramService = TelegramService.getInstance();
 
-// Telegram webhook endpoint (must be before other routes)
-app.post('/api', async (req, res) => {
+// Telegram webhook endpoint
+router.post('/webhook', (async (req: Request, res: Response) => {
   try {
-    logger.info('Received webhook request at /api');
-    logger.info('Request headers:', req.headers);
-    logger.info('Request body:', JSON.stringify(req.body, null, 2));
-    
-    if (!req.body) {
-      logger.error('No request body received');
-      res.sendStatus(400);
-      return;
-    }
-
+    logger.info('Received webhook request:', req.body);
     await telegramService.handleUpdate(req.body);
-    logger.info('Successfully processed webhook update');
-    res.sendStatus(200);
+    res.json({ ok: true });
   } catch (error: any) {
-    logger.error('Error handling webhook update:', error);
-    logger.error('Error stack:', error.stack);
-    res.sendStatus(500);
+    logger.error('Webhook handling failed:', error);
+    res.status(500).json({ 
+      error: 'Failed to process webhook',
+      message: error.message 
+    });
   }
-});
-
-// API Router setup
-const apiRouter = Router();
+}) as RequestHandler);
 
 // Health check endpoint
-apiRouter.get('/health', async (_req: Request, res: Response) => {
+router.get('/health', (async (_req: Request, res: Response) => {
   try {
     const health = await telegramService.getHealth();
     res.json(health);
@@ -74,10 +56,15 @@ apiRouter.get('/health', async (_req: Request, res: Response) => {
       error: error.message
     });
   }
-});
+}) as RequestHandler);
+
+interface ScoreUpdateRequest {
+  userId: number;
+  score: number;
+}
 
 // Score update endpoint
-apiRouter.post('/score', async (req: Request<{}, {}, ScoreUpdateRequest>, res: Response) => {
+router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Response) => {
   const { userId, score } = req.body;
   
   if (!userId || typeof score !== 'number') {
@@ -97,22 +84,16 @@ apiRouter.post('/score', async (req: Request<{}, {}, ScoreUpdateRequest>, res: R
       message: error.message 
     });
   }
-});
+}) as RequestHandler);
 
-// Mount API routes after webhook
-app.use('/api', apiRouter);
+// Mount API routes
+app.use('/api', router);
 
 // Serve static files
 app.use(express.static(path.join(DIST_DIR)));
 
 // Handle client-side routing
 app.get('*', (_req: Request, res: Response) => {
-  // Check if it's a direct browser access without userId parameter
-  if (!_req.query.userId) {
-    logger.info('Direct browser access detected, redirecting to Telegram bot');
-    return res.redirect(302, TELEGRAM_CONFIG.botUrl);
-  }
-
   logger.info('Serving index.html for path:', _req.path);
   res.sendFile(path.join(DIST_DIR, 'index.html'), (err) => {
     if (err) {

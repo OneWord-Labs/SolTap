@@ -2,10 +2,6 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/webhook.js",
-      "use": "@vercel/node"
-    },
-    {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -14,24 +10,13 @@
     },
     {
       "src": "dist/server/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "dist/**",
-          "package.json"
-        ]
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/webhook",
-      "methods": ["POST", "OPTIONS"],
-      "dest": "/api/webhook.js"
-    },
-    {
       "src": "/api/(.*)",
-      "dest": "/dist/server/index.js"
+      "dest": "dist/server/index.js"
     },
     {
       "src": "/assets/(.*)",

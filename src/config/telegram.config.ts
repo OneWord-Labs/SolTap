@@ -4,13 +4,12 @@ const telegramConfigSchema = z.object({
   botToken: z.string().min(1),
   gameShortName: z.string().min(1),
   webAppUrl: z.string(),
-  botUrl: z.string(),
 });
 
 export const TELEGRAM_CONFIG = {
   botToken: process.env.TELEGRAM_BOT_TOKEN || '',
   gameShortName: 'solsays',
-  webAppUrl: process.env.BASE_URL || 'https://play.soltap.xyz',
+  webAppUrl: process.env.BASE_URL || 'https://soltap-v1.vercel.app',
   botUrl: 'https://t.me/SolSays_bot',
 };
 

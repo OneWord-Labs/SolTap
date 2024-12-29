@@ -37,14 +37,13 @@ export class TelegramService {
   private async initializeBot() {
     try {
       if (process.env.NODE_ENV === 'production') {
-        // In production, use webhooks
-        const webhookUrl = `${TELEGRAM_CONFIG.webAppUrl}/api`;
+        // Set webhook in production
+        const webhookUrl = `${TELEGRAM_CONFIG.webAppUrl}/api/webhook`;
         await this.bot.setWebHook(webhookUrl);
         this.logger.info('Webhook set to:', webhookUrl);
       } else {
-        // In development, use polling
+        // Clear any existing webhook or polling state
         await this.bot.deleteWebHook();
-        this.logger.info('Webhook deleted, using polling');
       }
       
       this.bot.on('error', (error) => {
@@ -96,43 +95,6 @@ export class TelegramService {
     });
   }
 
-  async handleUpdate(update: TelegramBot.Update): Promise<void> {
-    try {
-      this.logger.info('Processing update:', JSON.stringify(update, null, 2));
-      
-      // Handle /start command
-      if (update.message?.text === '/start') {
-        this.logger.info('Received /start command from chat:', update.message.chat.id);
-        try {
-          this.logger.info('Attempting to send game with shortName:', TELEGRAM_CONFIG.gameShortName);
-          await this.bot.sendGame(update.message.chat.id, TELEGRAM_CONFIG.gameShortName);
-          this.logger.info('Successfully sent game to chat:', update.message.chat.id);
-        } catch (error: any) {
-          this.logger.error('Failed to send game:', error);
-          this.logger.error('Error stack:', error.stack);
-          await this.bot.sendMessage(update.message.chat.id, 'Sorry, there was an error starting the game. Error: ' + error.message);
-        }
-      } else {
-        this.logger.info('Update did not contain /start command:', update.message?.text);
-      }
-      
-      // Handle callback query (when user clicks the game)
-      if (update.callback_query?.game_short_name === TELEGRAM_CONFIG.gameShortName) {
-        this.logger.info('Received game callback query from user:', update.callback_query.from.id);
-        const gameUrl = `${TELEGRAM_CONFIG.webAppUrl}?userId=${update.callback_query.from.id}`;
-        this.logger.info('Answering callback query with URL:', gameUrl);
-        await this.bot.answerCallbackQuery(update.callback_query.id, {
-          url: gameUrl,
-        });
-        this.logger.info('Successfully answered callback query for user:', update.callback_query.from.id);
-      }
-    } catch (error: any) {
-      this.logger.error('Error handling update:', error);
-      this.logger.error('Error stack:', error.stack);
-      throw error;
-    }
-  }
-
   async updateScore(userId: number, score: number): Promise<void> {
     try {
       await this.bot.setGameScore(userId, score, { force: true });
@@ -156,6 +118,16 @@ export class TelegramService {
         }
       };
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async handleUpdate(update: TelegramBot.Update): Promise<void> {
+    try {
+      this.logger.info('Processing webhook update:', update);
+      await this.bot.processUpdate(update);
+    } catch (error) {
+      this.logger.error('Error processing webhook update:', error);
       throw error;
     }
   }
