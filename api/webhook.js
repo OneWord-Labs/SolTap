@@ -6,60 +6,62 @@ const gameShortName = 'solsays';
 const webAppUrl = process.env.BASE_URL || 'https://play.soltap.xyz';
 
 // Export the handler function
-module.exports = async (request, response) => {
+module.exports = async (req, res) => {
   // Set CORS headers
-  response.setHeader('Access-Control-Allow-Credentials', true);
-  response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // Handle preflight request
-  if (request.method === 'OPTIONS') {
-    response.status(200).end();
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
     return;
   }
 
   // Only allow POST requests
-  if (request.method !== 'POST') {
-    return response.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') {
+    console.error('Method not allowed:', req.method);
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     console.log('Received webhook request:', {
-      headers: request.headers,
-      body: request.body
+      method: req.method,
+      headers: req.headers,
+      body: req.body
     });
 
     // Handle /start command
-    if (request.body?.message?.text === '/start') {
-      console.log('Received /start command from chat:', request.body.message.chat.id);
+    if (req.body?.message?.text === '/start') {
+      console.log('Received /start command from chat:', req.body.message.chat.id);
       try {
-        await bot.sendGame(request.body.message.chat.id, gameShortName);
-        console.log('Successfully sent game to chat:', request.body.message.chat.id);
+        await bot.sendGame(req.body.message.chat.id, gameShortName);
+        console.log('Successfully sent game to chat:', req.body.message.chat.id);
       } catch (error) {
         console.error('Error sending game:', error);
-        await bot.sendMessage(request.body.message.chat.id, 'Sorry, there was an error starting the game.');
+        await bot.sendMessage(req.body.message.chat.id, 'Sorry, there was an error starting the game.');
       }
     }
 
     // Handle callback query
-    if (request.body?.callback_query?.game_short_name === gameShortName) {
-      console.log('Received game callback query from user:', request.body.callback_query.from.id);
+    if (req.body?.callback_query?.game_short_name === gameShortName) {
+      console.log('Received game callback query from user:', req.body.callback_query.from.id);
       try {
-        await bot.answerCallbackQuery(request.body.callback_query.id, {
-          url: `${webAppUrl}?userId=${request.body.callback_query.from.id}`,
+        await bot.answerCallbackQuery(req.body.callback_query.id, {
+          url: `${webAppUrl}?userId=${req.body.callback_query.from.id}`,
         });
-        console.log('Successfully answered callback query for user:', request.body.callback_query.from.id);
+        console.log('Successfully answered callback query for user:', req.body.callback_query.from.id);
       } catch (error) {
         console.error('Error answering callback query:', error);
       }
     }
 
-    // Always respond with 200 OK
-    return response.status(200).json({ ok: true });
+    // Always respond with 200 OK for Telegram
+    return res.status(200).json({ ok: true });
   } catch (error) {
     console.error('Error in webhook handler:', error);
     // Still send 200 OK to Telegram
-    return response.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true });
   }
 }; 
