@@ -21,22 +21,65 @@ export class TelegramService {
 
   private constructor() {
     this.logger = logger;
-    this.bot = new TelegramBot(TELEGRAM_CONFIG.botToken, {
-      webHook: {
-        port: process.env.PORT ? Number(process.env.PORT) : 3001
-      }
-    });
 
-    // Set up webhook if in production
+    // In production, use webhook. In development, use polling.
+    const options: TelegramBot.ConstructorOptions = {
+      webHook: process.env.NODE_ENV === 'production' ? {
+        port: process.env.PORT ? Number(process.env.PORT) : 3001
+      } : undefined,
+      polling: process.env.NODE_ENV !== 'production'
+    };
+
+    this.bot = new TelegramBot(TELEGRAM_CONFIG.botToken, options);
+
+    // Set up webhook only in production
     if (process.env.NODE_ENV === 'production') {
-      const baseUrl = process.env.BASE_URL || 'https://sol-tap-v2-stable-production.up.railway.app';
+      const baseUrl = process.env.BASE_URL;
+      if (!baseUrl) {
+        throw new Error('BASE_URL environment variable is required in production');
+      }
       const webhookUrl = `${baseUrl}/api/webhook`;
       this.bot.setWebHook(webhookUrl).then(() => {
         this.logger.info('Webhook set successfully:', webhookUrl);
       }).catch(error => {
         this.logger.error('Failed to set webhook:', error);
       });
+    } else {
+      // In development, ensure webhook is deleted
+      this.bot.deleteWebHook().then(() => {
+        this.logger.info('Webhook deleted for development mode');
+      }).catch(error => {
+        this.logger.error('Failed to delete webhook:', error);
+      });
     }
+
+    this.setupEventHandlers();
+  }
+
+  private setupEventHandlers() {
+    this.bot.on('error', (error) => {
+      this.logger.error('Telegram Bot Error:', error);
+    });
+
+    this.bot.on('polling_error', (error: TelegramError) => {
+      if (error.code === 'ETELEGRAM' && error.response?.statusCode === 409) {
+        this.logger.warn('Polling conflict detected, stopping current polling...');
+        this.bot.stopPolling()
+          .then(() => {
+            this.logger.info('Polling stopped, waiting before retry...');
+            setTimeout(() => {
+              this.logger.info('Retrying bot initialization...');
+              this.bot.startPolling()
+                .catch(err => this.logger.error('Error restarting polling:', err));
+            }, 5000);
+          })
+          .catch(err => this.logger.error('Error stopping polling:', err));
+      } else {
+        this.logger.error('Telegram Polling Error:', error);
+      }
+    });
+
+    this.setupCommands();
   }
 
   public static getInstance(): TelegramService {
@@ -44,47 +87,6 @@ export class TelegramService {
       TelegramService.instance = new TelegramService();
     }
     return TelegramService.instance;
-  }
-
-  private async initializeBot() {
-    try {
-      if (process.env.NODE_ENV === 'production') {
-        // Set webhook in production
-        const webhookUrl = `${TELEGRAM_CONFIG.webAppUrl}/api/webhook`;
-        await this.bot.setWebHook(webhookUrl);
-        this.logger.info('Webhook set to:', webhookUrl);
-      } else {
-        // Clear any existing webhook or polling state
-        await this.bot.deleteWebHook();
-      }
-      
-      this.bot.on('error', (error) => {
-        this.logger.error('Telegram Bot Error:', error);
-      });
-
-      this.bot.on('polling_error', (error: TelegramError) => {
-        if (error.code === 'ETELEGRAM' && error.response?.statusCode === 409) {
-          this.logger.warn('Polling conflict detected, stopping current polling...');
-          this.bot.stopPolling()
-            .then(() => {
-              this.logger.info('Polling stopped, waiting before retry...');
-              setTimeout(() => {
-                this.logger.info('Retrying bot initialization...');
-                this.bot.startPolling()
-                  .catch(err => this.logger.error('Error restarting polling:', err));
-              }, 5000);
-            })
-            .catch(err => this.logger.error('Error stopping polling:', err));
-        } else {
-          this.logger.error('Telegram Polling Error:', error);
-        }
-      });
-
-      this.setupCommands();
-    } catch (error) {
-      this.logger.error('Error initializing bot:', error);
-      throw error;
-    }
   }
 
   private setupCommands() {
@@ -126,7 +128,9 @@ export class TelegramService {
           connected: true,
           botInfo,
           gameUrl: TELEGRAM_CONFIG.webAppUrl,
-          botToken: TELEGRAM_CONFIG.botToken ? '✓ Set' : '✗ Missing'
+          botToken: TELEGRAM_CONFIG.botToken ? '✓ Set' : '✗ Missing',
+          mode: process.env.NODE_ENV === 'production' ? 'webhook' : 'polling',
+          port: process.env.PORT ? Number(process.env.PORT) : 3001
         }
       };
     } catch (error) {
