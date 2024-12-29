@@ -1,17 +1,20 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "dist/server",
     "target": "ES2022",
     "lib": ["ES2022"],
     "isolatedModules": true,
     "noEmit": false,
     "esModuleInterop": true,
-    "moduleResolution": "node",
     "allowJs": true,
     "checkJs": false,
     "sourceMap": true
+  },
+  "ts-node": {
+    "esm": true
   },
   "include": ["src/server/**/*", "src/services/**/*", "src/config/**/*", "src/utils/**/*"],
   "exclude": ["node_modules", "dist"]
