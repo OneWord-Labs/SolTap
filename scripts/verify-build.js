@@ -7,7 +7,7 @@ const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 
 const requiredFiles = [
-  'dist/server/index.js',
+  'dist/server/server/index.js',
   'dist/server/services/telegram/telegram.service.js',
   'dist/index.html',
 ];
@@ -33,7 +33,7 @@ if (!packageJson.type === 'module') {
 }
 
 // Check for ES modules syntax in server code
-const serverIndex = readFileSync(join(rootDir, 'dist/server/index.js'), 'utf8');
+const serverIndex = readFileSync(join(rootDir, 'dist/server/server/index.js'), 'utf8');
 if (!serverIndex.includes('export') && !serverIndex.includes('import')) {
   errors.push('Server code does not appear to use ES modules');
 }
