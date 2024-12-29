@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://sol-tap-v2-stable-production.up.railway.app/api/:path*"
+      "destination": "https://sol-tap-v2-stable-production.up.railway.app:3001/api/:path*"
     }
   ]
 } 
