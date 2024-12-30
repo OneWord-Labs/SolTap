@@ -79,7 +79,7 @@ jobs:
             DEBUG=true \
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN_PREVIEW }} \
             TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME_PREVIEW }} \
-            TELEGRAM_WEBHOOK_URL=https://api.staging.soltap.xyz \
+            TELEGRAM_WEBHOOK_URL=https://soltap-bot-preview.fly.dev \
             FRONTEND_URL=https://staging.soltap.xyz \
             DATABASE_URL=${{ secrets.DATABASE_URL_PREVIEW }} \
             JWT_SECRET=${{ secrets.JWT_SECRET_PREVIEW }} \
@@ -98,7 +98,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🤖 Backend Preview deployed to: https://api.staging.soltap.xyz`
+              body: `🤖 Backend Preview deployed to: https://soltap-bot-preview.fly.dev`
             })
 
   deploy-production:
@@ -131,7 +131,7 @@ jobs:
             DEBUG=false \
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN_PROD }} \
             TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME_PROD }} \
-            TELEGRAM_WEBHOOK_URL=https://api.soltap.xyz \
+            TELEGRAM_WEBHOOK_URL=https://soltap-bot.fly.dev \
             FRONTEND_URL=https://app.soltap.xyz \
             DATABASE_URL=${{ secrets.DATABASE_URL_PROD }} \
             JWT_SECRET=${{ secrets.JWT_SECRET_PROD }} \
