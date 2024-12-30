@@ -76,7 +76,7 @@ jobs:
       - name: Set Preview Environment Variables
         run: |
           PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-          vercel env add VITE_API_URL https://soltap-bot-preview-${PR_NUMBER}.fly.dev --token=${{ secrets.VERCEL_TOKEN }} --environment=preview
+          vercel env add VITE_API_URL https://api.staging.soltap.xyz --token=${{ secrets.VERCEL_TOKEN }} --environment=preview
           vercel env add VITE_TELEGRAM_BOT_USERNAME ${{ secrets.TELEGRAM_BOT_USERNAME_PREVIEW }} --token=${{ secrets.VERCEL_TOKEN }} --environment=preview
           vercel env add VITE_DEBUG true --token=${{ secrets.VERCEL_TOKEN }} --environment=preview
           vercel env add VITE_ENVIRONMENT preview --token=${{ secrets.VERCEL_TOKEN }} --environment=preview
