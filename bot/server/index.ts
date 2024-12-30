@@ -116,7 +116,7 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
 app.use('/api', router);
 
 // Start server
-const PORT = parseInt(process.env.PORT || '3001', 10);
+const PORT = parseInt(process.env.PORT || '8080', 10);
 const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`Server running at http://0.0.0.0:${PORT}`);
   logger.info('Environment:', process.env.NODE_ENV || 'production');
