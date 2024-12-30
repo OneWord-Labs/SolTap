@@ -51,7 +51,7 @@ jobs:
             vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           fi
         env:
-          VITE_API_URL: ${{ github.event_name == 'pull_request' && 'https://sol-tap-staging.fly.dev' || 'https://sol-tap-v2-stable.fly.dev' }}
+          VITE_API_URL: ${{ github.event_name == 'pull_request' && 'https://soltap-bot-preview.fly.dev' || 'https://soltap-bot.fly.dev' }}
       
       - name: Deploy to Vercel
         run: |
