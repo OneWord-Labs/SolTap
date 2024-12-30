@@ -11,9 +11,6 @@ on:
     paths:
       - 'bot/**'
 
-env:
-  NODE_VERSION: 18
-
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -26,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 18
           cache: 'npm'
           cache-dependency-path: 'bot/package-lock.json'
 
@@ -41,13 +38,18 @@ jobs:
 
       - name: Test
         run: npm run test || true
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TEST_TELEGRAM_BOT_TOKEN }}
 
       - name: Build
         run: npm run build
         env:
-          NODE_ENV: production
+          NODE_ENV: preview
+          PORT: 3000
+          DEBUG: true
+          TELEGRAM_BOT_TOKEN: test_token
+          TELEGRAM_WEBHOOK_URL: http://localhost:3000
+          FRONTEND_URL: http://localhost:5173
+          DATABASE_URL: test_db_url
+          JWT_SECRET: test_secret
 
   deploy-preview:
     needs: verify
@@ -62,41 +64,38 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      
+          node-version: 18
+          
       - name: Install Dependencies
         run: npm ci
-      
-      - uses: superfly/flyctl-actions/setup-flyctl@master
+          
+      - name: Install Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io (Preview)
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
-          # Create a unique app name for the preview deployment
           PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
           APP_NAME="soltap-bot-preview-${PR_NUMBER}"
           
-          # Create new app if it doesn't exist
-          flyctl apps create ${APP_NAME} --org personal || true
+          # Try to create the app (ignore if it exists)
+          flyctl apps create "$APP_NAME" || true
           
-          # Deploy to preview environment
-          flyctl deploy --app ${APP_NAME} --config fly.preview.toml --build-arg NODE_ENV=preview
-          
-          # Get the deployment URL
-          DEPLOYMENT_URL="https://${APP_NAME}.fly.dev"
-          echo "Preview deployment URL: $DEPLOYMENT_URL"
-          echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
+          # Deploy the app
+          flyctl deploy --app "$APP_NAME" --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Comment PR
         uses: actions/github-script@v6
         with:
           script: |
+            const prNumber = context.payload.pull_request.number;
+            const appUrl = `https://soltap-bot-preview-${prNumber}.fly.dev`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🤖 Backend Preview deployed to: ${process.env.DEPLOYMENT_URL}`
+              body: `🤖 Backend Preview deployed to: ${appUrl}`
             })
 
   deploy-production:
@@ -112,14 +111,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      
+          node-version: 18
+          
       - name: Install Dependencies
         run: npm ci
-      
-      - uses: superfly/flyctl-actions/setup-flyctl@master
+          
+      - name: Install Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io (Production)
+        run: flyctl deploy --app soltap-bot --remote-only
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: flyctl deploy --config fly.toml --build-arg NODE_ENV=production 
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }} 

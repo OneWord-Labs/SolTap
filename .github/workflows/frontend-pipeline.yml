@@ -14,7 +14,6 @@ on:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  NODE_VERSION: 18
 
 jobs:
   verify:
@@ -28,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 18
           cache: 'npm'
           cache-dependency-path: 'game/package-lock.json'
 
@@ -65,7 +64,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 18
           
       - name: Install Dependencies
         run: npm ci
@@ -111,7 +110,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 18
           
       - name: Install Dependencies
         run: npm ci
