@@ -24,30 +24,22 @@ function App() {
 
   useEffect(() => {
     // Initialize Telegram WebApp
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-    }
+    window.Telegram?.WebApp?.ready();
+    window.Telegram?.WebApp?.expand();
 
-    // Initialize Phaser game
+    // Initialize Phaser
     if (!gameRef.current) {
-      gameRef.current = new Phaser.Game({
-        ...gameConfig,
-        parent: 'game-container'
-      });
+      gameRef.current = new Phaser.Game(gameConfig);
     }
 
+    // Cleanup
     return () => {
       gameRef.current?.destroy(true);
       gameRef.current = null;
     };
   }, []);
 
-  return (
-    <div className="w-full h-full bg-black">
-      <div id="game-container" className="w-full h-full" />
-    </div>
-  );
+  return <div id="game-container" />;
 }
 
 export default App;

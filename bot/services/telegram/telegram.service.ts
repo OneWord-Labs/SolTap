@@ -26,22 +26,25 @@ export class TelegramService {
     this.gameShortName = gameShortName;
     this.logger = new Logger('TelegramService');
     
-    // In production, don't start a server - we'll use Express for webhooks
-    if (process.env.NODE_ENV === 'production') {
-      this.bot = new TelegramBot(token, { webHook: false });
-      
+    // Use polling in development, webhooks in production
+    if (process.env.NODE_ENV === 'development') {
+      this.bot = new TelegramBot(token, { polling: true });
+      this.logger.info('Bot started in polling mode (development)');
+    } else {
+      this.bot = new TelegramBot(token, { webHook: { port: parseInt(process.env.PORT || '3001', 10) } });
       const webhookUrl = `${baseUrl}/api/webhook`;
       this.logger.info(`Setting webhook URL to: ${webhookUrl}`);
       
-      this.bot.setWebHook(webhookUrl).then(() => {
+      // Delete any existing webhook first
+      this.bot.deleteWebHook().then(() => {
+        // Set the new webhook
+        return this.bot.setWebHook(webhookUrl);
+      }).then(() => {
         this.logger.info('Webhook set successfully');
       }).catch((error) => {
         this.logger.error('Failed to set webhook:', error);
         process.exit(1);
       });
-    } else {
-      this.bot = new TelegramBot(token, { polling: true });
-      this.logger.info('Bot started in polling mode (development)');
     }
 
     this.setupHandlers();
