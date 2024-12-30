@@ -1,50 +1,46 @@
-# Sol Tap V2
+# Sol Says - Telegram Game Bot Setup Guide
 
-A Telegram mini-game built with TypeScript and Vite.
-
-## Deployment Status
-[![Vercel Deployment](https://img.shields.io/badge/vercel-deployed-success)](https://soltap.vercel.app)
-
-## Development
-
-1. Install dependencies:
-```bash
-npm install
+## Project Structure
+```
+.
+├── bot/                 # Telegram bot server
+│   ├── server/         # Server code
+│   ├── .env.production # Production environment variables
+│   └── fly.toml        # Fly.io deployment configuration
+└── game/               # Game frontend
 ```
 
-2. Start development server:
-```bash
-npm run dev
+## Critical Configuration Steps
+
+### 1. Telegram Bot Setup
+1. Create bot through @BotFather:
+   - Use `/newbot` command
+   - Set name and username
+   - Save the bot token securely
+
+2. Create game through @BotFather:
+   - Use `/newgame` command
+   - Select your bot
+   - Set game title and description
+   - Upload photo
+   - **IMPORTANT**: Save the game's short name exactly as provided by BotFather
+   - The game short name is case-sensitive and must match exactly
+
+### 2. Environment Variables
+Bot server requires these exact environment variables in `bot/.env.production`:
+```
+TELEGRAM_BOT_TOKEN=your_bot_token
+BASE_URL=https://soltap-bot.fly.dev
+GAME_URL=https://app.soltap.xyz
+NODE_ENV=production
+GAME_SHORT_NAME=solsays        # Must match BotFather's game short name exactly
+BOT_USERNAME=SolSays_bot       # Must match bot's username exactly
 ```
 
-3. For local testing with Telegram Bot:
-```bash
-npm run dev:ngrok
-```
-
-## Environment Variables
-
-Required environment variables:
-- `TELEGRAM_BOT_TOKEN`: Your Telegram Bot token
-- `BASE_URL`: Local development URL
-- `PRODUCTION_URL`: Production deployment URL
-
-## Fly.io Environment Setup
-
-### Backend Environments
-
-The backend service is deployed to two separate Fly.io applications:
-
-- Production: `soltap-bot` (soltap-bot.fly.dev)
-- Staging: `soltap-bot-preview` (soltap-bot-preview.fly.dev)
-
-### Deployment Configuration
-
-Each environment has its own configuration in `bot/fly.toml`:
-
+### 3. Fly.io Configuration
+In `bot/fly.toml`:
 ```toml
-# Production Configuration
-app = "soltap-bot"
+app = "soltap-bot"             # Must match your fly.io app name
 primary_region = "lax"
 
 [build]
@@ -62,58 +58,102 @@ primary_region = "lax"
   min_machines_running = 0
 ```
 
-### Environment Variables
+## Deployment Process
 
-Sensitive information is managed through Fly.io secrets:
-
+1. Set up Fly.io secrets:
 ```bash
-# Set secrets for production
-fly secrets set TELEGRAM_BOT_TOKEN="your-token" --app soltap-bot
-
-# Set secrets for staging
-fly secrets set TELEGRAM_BOT_TOKEN="your-token" --app soltap-bot-preview
+fly secrets set \
+  TELEGRAM_BOT_TOKEN="your_bot_token" \
+  BASE_URL="https://soltap-bot.fly.dev" \
+  GAME_URL="https://app.soltap.xyz" \
+  GAME_SHORT_NAME="solsays" \
+  BOT_USERNAME="SolSays_bot" \
+  -a soltap-bot
 ```
 
-### Deployment Commands
-
-Deploy to production:
+2. Deploy:
 ```bash
-cd bot && fly deploy --app soltap-bot
+cd bot
+fly deploy
 ```
 
-Deploy to staging:
+3. Verify deployment:
 ```bash
-cd bot && fly deploy --app soltap-bot-preview
+fly status -a soltap-bot
+fly logs -a soltap-bot
 ```
 
-### Monitoring and Logs
+## Common Issues and Solutions
 
-View production logs:
+### 1. Wrong Game Short Name
+- Error: "wrong game short name specified"
+- Solution: 
+  - Check game short name with @BotFather
+  - Use EXACTLY the same name (case-sensitive)
+  - Update both .env.production and fly.io secrets
+
+### 2. Port Conflicts
+If deployment fails with port conflicts:
 ```bash
-fly logs --app soltap-bot
+# Force destroy existing machine
+fly machine destroy --force MACHINE_ID -a soltap-bot
+# Then redeploy
+fly deploy
 ```
 
-View staging logs:
+### 3. Webhook Issues
+- Verify webhook status:
 ```bash
-fly logs --app soltap-bot-preview
+curl -X GET "https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo"
+```
+- Bot automatically sets webhook on startup
+- Webhook URL must be HTTPS
+- Webhook URL must match BASE_URL/api/webhook
+
+## Development Setup
+
+1. Clone repository
+2. Create `.env` file in bot directory with development settings
+3. Install dependencies:
+```bash
+cd bot
+npm install
+cd ../game
+npm install
 ```
 
-Check application status:
+4. Start development servers:
 ```bash
-fly status --app soltap-bot        # Production
-fly status --app soltap-bot-preview # Staging
+# Bot server
+cd bot
+npm run dev
+
+# Game frontend
+cd game
+npm run dev
 ```
 
-### CI/CD Integration
+## Critical Reminders
 
-The GitHub Actions workflows automatically deploy:
-- Production: When merging to `main` branch
-- Staging: When creating pull requests or pushing to `preview` branch
+1. Never change the app name in fly.toml without proper migration
+2. Always verify game short name with BotFather before deployment
+3. Keep production and staging environments completely separate
+4. Always check logs after deployment
+5. Maintain separate bots for staging and production
 
-### Best Practices
+## Troubleshooting Checklist
 
-1. Always test changes in the staging environment first
-2. Use separate environment variables for each environment
-3. Monitor application logs after deployments
-4. Keep the `fly.toml` configuration in version control
-5. Use descriptive commit messages for deployment changes
+1. Verify environment variables match exactly
+2. Confirm game short name with BotFather
+3. Check webhook configuration
+4. Verify fly.io app name matches deployment
+5. Check server logs for specific errors
+6. Verify all secrets are set in fly.io
+7. Ensure bot has correct permissions
+
+## Backup and Recovery
+
+1. Keep backup of working configuration files
+2. Document all environment variables
+3. Save BotFather responses with critical information
+4. Maintain deployment history in fly.io
