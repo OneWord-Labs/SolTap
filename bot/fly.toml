@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for sol-tap-v2-stable on 2024-12-29T10:35:46-08:00
+# fly.toml app configuration file
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "sol-tap-staging-bot"
+app = "soltap-bot"
 primary_region = "lax"
 
 [build]
