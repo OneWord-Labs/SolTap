@@ -72,20 +72,7 @@ jobs:
 
       - name: Deploy to Fly.io (Preview)
         run: |
-          # Set environment variables
-          flyctl secrets set \
-            NODE_ENV=preview \
-            PORT=3001 \
-            DEBUG=true \
-            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN_PREVIEW }} \
-            TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME_PREVIEW }} \
-            TELEGRAM_WEBHOOK_URL=https://soltap-bot-preview.fly.dev \
-            FRONTEND_URL=https://staging.soltap.xyz \
-            DATABASE_URL=${{ secrets.DATABASE_URL_PREVIEW }} \
-            JWT_SECRET=${{ secrets.JWT_SECRET_PREVIEW }} \
-            --app soltap-bot-preview
-          
-          # Deploy the app
+          # Deploy to preview app
           flyctl deploy --app soltap-bot-preview --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
@@ -98,7 +85,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🤖 Backend Preview deployed to: https://soltap-bot-preview.fly.dev`
+              body: `🤖 Backend Preview deployed`
             })
 
   deploy-production:
@@ -123,21 +110,6 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io (Production)
-        run: |
-          # Set environment variables
-          flyctl secrets set \
-            NODE_ENV=production \
-            PORT=3001 \
-            DEBUG=false \
-            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN_PROD }} \
-            TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME_PROD }} \
-            TELEGRAM_WEBHOOK_URL=https://soltap-bot.fly.dev \
-            FRONTEND_URL=https://app.soltap.xyz \
-            DATABASE_URL=${{ secrets.DATABASE_URL_PROD }} \
-            JWT_SECRET=${{ secrets.JWT_SECRET_PROD }} \
-            --app soltap-bot
-          
-          # Deploy the app
-          flyctl deploy --app soltap-bot --remote-only
+        run: flyctl deploy --app soltap-bot --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }} 
