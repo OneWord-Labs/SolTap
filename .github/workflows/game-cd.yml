@@ -1,14 +1,18 @@
-name: Game CD
+name: Frontend Pipeline
 
 on:
   push:
-    branches: [ main, preview ]
+    branches: [ main ]
+    paths:
+      - 'game/**'
+  pull_request:
+    branches: [ main ]
     paths:
       - 'game/**'
 
 jobs:
   deploy:
-    name: Deploy game
+    name: Deploy Frontend
     runs-on: ubuntu-latest
     
     defaults:
@@ -18,29 +22,41 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './game/package-lock.json'
+      
+      - name: Install dependencies
+        run: npm ci
+      
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       
       - name: Pull Vercel Environment Information
         run: |
-          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          else
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
             vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           fi
       
-      - name: Build Project Artifacts
+      - name: Build Project
         run: |
-          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          else
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
             vercel build --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-      
-      - name: Deploy Project Artifacts to Vercel
-        run: |
-          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
           else
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+        env:
+          VITE_API_URL: ${{ github.event_name == 'pull_request' && 'https://soltap-bot-preview.fly.dev' || 'https://soltap-bot.fly.dev' }}
+      
+      - name: Deploy to Vercel
+        run: |
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
             vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
           fi 
