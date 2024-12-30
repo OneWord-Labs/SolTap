@@ -39,7 +39,14 @@ function App() {
     };
   }, []);
 
-  return <div id="game-container" />;
+  return (
+    <div>
+      <div style={{ position: 'fixed', top: 0, left: 0, padding: '8px', background: 'rgba(0,0,0,0.5)', color: '#fff', zIndex: 1000 }}>
+        Preview Test
+      </div>
+      <div id="game-container" />
+    </div>
+  );
 }
 
 export default App;
