@@ -41,23 +41,10 @@ function App() {
 
   return (
     <div>
-      <div style={{ 
-        position: 'fixed', 
-        top: 0, 
-        left: 0, 
-        right: 0,
-        padding: '1rem',
-        background: '#4CAF50',
-        color: 'white',
-        textAlign: 'center',
-        zIndex: 1000
-      }}>
-        <h1 style={{ margin: 0 }}>Preview Environment Test</h1>
-        <p style={{ margin: '0.5rem 0 0' }}>
-          Testing preview deployment - {import.meta.env.VITE_ENVIRONMENT}
-        </p>
+      <div style={{ position: 'fixed', top: 0, left: 0, padding: '1rem', background: '#000', color: '#fff' }}>
+        Test Preview Deployment
       </div>
-      <div id="game-container" style={{ marginTop: '100px' }} />
+      <div id="game-container" />
     </div>
   );
 }
