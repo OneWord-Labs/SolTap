@@ -111,6 +111,14 @@ router.post('/score', (async (req: Request<{}, {}, ScoreUpdateRequest>, res: Res
 // Mount API routes
 app.use('/api', router);
 
+app.get('/preview-test', (req, res) => {
+  res.json({
+    message: 'Preview environment test',
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Start server
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const server = app.listen(PORT, '0.0.0.0', () => {
