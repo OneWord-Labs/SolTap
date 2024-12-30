@@ -39,6 +39,7 @@ jobs:
         run: |
           cd bot
           cp fly.staging.toml fly.toml
+          flyctl secrets set TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN_PREVIEW }}" --app soltap-bot-preview
           flyctl deploy --remote-only --app soltap-bot-preview
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
@@ -47,6 +48,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           cd bot
+          flyctl secrets set TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}" --app soltap-bot
           flyctl deploy --remote-only --app soltap-bot
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }} 
