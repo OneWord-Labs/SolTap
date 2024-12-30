@@ -2,7 +2,7 @@ name: Bot CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, preview ]
     paths:
       - 'bot/**'
 
@@ -21,6 +21,11 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       
       - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only
+        run: |
+          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+            flyctl deploy --app sol-tap-v2-stable --remote-only
+          else
+            flyctl deploy --app sol-tap-staging-bot --remote-only
+          fi
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }} 
