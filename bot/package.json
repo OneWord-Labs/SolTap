@@ -10,7 +10,10 @@
     "dev": "tsx watch server/index.ts",
     "build": "tsc",
     "start": "node --experimental-specifier-resolution=node dist/server/index.js",
-    "start:debug": "DEBUG=app:* node --experimental-specifier-resolution=node dist/server/index.js"
+    "start:debug": "DEBUG=app:* node --experimental-specifier-resolution=node dist/server/index.js",
+    "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'No tests configured'"
   },
   "dependencies": {
     "@types/cors": "^2.8.17",
