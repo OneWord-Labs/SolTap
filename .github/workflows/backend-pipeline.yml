@@ -123,6 +123,21 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io (Production)
-        run: flyctl deploy --app soltap-bot --remote-only
+        run: |
+          # Set environment variables
+          flyctl secrets set \
+            NODE_ENV=production \
+            PORT=3001 \
+            DEBUG=false \
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN_PROD }} \
+            TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME_PROD }} \
+            TELEGRAM_WEBHOOK_URL=https://api.soltap.xyz \
+            FRONTEND_URL=https://app.soltap.xyz \
+            DATABASE_URL=${{ secrets.DATABASE_URL_PROD }} \
+            JWT_SECRET=${{ secrets.JWT_SECRET_PROD }} \
+            --app soltap-bot
+          
+          # Deploy the app
+          flyctl deploy --app soltap-bot --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }} 
