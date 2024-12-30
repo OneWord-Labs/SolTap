@@ -39,7 +39,13 @@ function App() {
     };
   }, []);
 
-  return <div id="game-container" />;
+  return (
+    <div>
+      <h1>Preview Environment Test</h1>
+      <p>Testing preview deployment - {import.meta.env.VITE_ENVIRONMENT}</p>
+      <div id="game-container" />
+    </div>
+  );
 }
 
 export default App;
