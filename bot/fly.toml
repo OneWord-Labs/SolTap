@@ -12,13 +12,15 @@ primary_region = "lax"
 [env]
   NODE_ENV = "production"
   PORT = "8080"
+  DEBUG = "true"
+  FRONTEND_URL = "https://staging.soltap.xyz"
 
 [http_service]
   internal_port = 8080
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ["app"]
 
 [[services]]
