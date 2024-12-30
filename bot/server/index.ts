@@ -55,7 +55,11 @@ router.post('/webhook', (async (req: Request, res: Response) => {
 // Health check endpoints
 router.get('/health', (_req: Request, res: Response) => {
   logger.info('Health check request received');
-  res.status(200).send('OK');
+  res.status(200).json({
+    status: 'OK',
+    message: 'Test deployment',
+    timestamp: new Date().toISOString()
+  });
 });
 
 router.get('/health/details', (async (_req: Request, res: Response) => {
