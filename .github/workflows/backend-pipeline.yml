@@ -11,6 +11,9 @@ on:
     paths:
       - 'bot/**'
 
+env:
+  NODE_VERSION: 18
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -23,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: 'bot/package-lock.json'
 
@@ -50,6 +53,11 @@ jobs:
         working-directory: bot
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
       
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
@@ -92,6 +100,11 @@ jobs:
         working-directory: bot
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
       
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
