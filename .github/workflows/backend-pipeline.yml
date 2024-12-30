@@ -41,11 +41,11 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: preview
-          PORT: 3000
+          PORT: 3001
           DEBUG: true
           TELEGRAM_BOT_TOKEN: test_token
-          TELEGRAM_WEBHOOK_URL: http://localhost:3000
-          FRONTEND_URL: http://localhost:5173
+          TELEGRAM_WEBHOOK_URL: http://localhost:3001
+          FRONTEND_URL: http://localhost:3000
           DATABASE_URL: test_db_url
           JWT_SECRET: test_secret
 
@@ -77,6 +77,19 @@ jobs:
           
           # Try to create the app (ignore if it exists)
           flyctl apps create "$APP_NAME" || true
+          
+          # Set environment variables
+          flyctl secrets set \
+            NODE_ENV=preview \
+            PORT=3001 \
+            DEBUG=true \
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN_PREVIEW }} \
+            TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME_PREVIEW }} \
+            TELEGRAM_WEBHOOK_URL=https://${APP_NAME}.fly.dev \
+            FRONTEND_URL=${{ secrets.FRONTEND_URL_PREVIEW }} \
+            DATABASE_URL=${{ secrets.DATABASE_URL_PREVIEW }} \
+            JWT_SECRET=${{ secrets.JWT_SECRET_PREVIEW }} \
+            --app "$APP_NAME"
           
           # Deploy the app
           flyctl deploy --app "$APP_NAME" --remote-only
