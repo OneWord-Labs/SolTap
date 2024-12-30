@@ -1,70 +1,69 @@
-import Phaser from 'phaser';
-import { COLORS, REWARDS } from '../constants';
+import { Scene } from 'phaser';
+import { COLORS } from '../constants';
 
 export class UIManager {
-  private scene: Phaser.Scene;
-  private levelText: Phaser.GameObjects.Text;
-  private tokenText: Phaser.GameObjects.Text;
-  private homeButton: Phaser.GameObjects.Container;
-  private onTryAgain: () => void;
-  private onReturnToMenu: () => void;
+  private scene: Scene;
+  private levelText!: Phaser.GameObjects.Text;
+  private tokenText!: Phaser.GameObjects.Text;
+  private homeButton!: Phaser.GameObjects.Text;
+  private onTryAgain?: () => void;
 
-  constructor(scene: Phaser.Scene, onTryAgain: () => void, onReturnToMenu: () => void) {
+  constructor(scene: Scene) {
     this.scene = scene;
-    this.onTryAgain = onTryAgain;
-    this.onReturnToMenu = onReturnToMenu;
-    this.createUI();
+    this.init();
   }
 
-  private createUI() {
-    this.createTexts();
-    this.createHomeButton();
-  }
-
-  private createTexts() {
-    this.levelText = this.scene.add.text(16, 16, '', {
-      fontSize: '24px',
-      color: '#14F195'
+  private init() {
+    this.levelText = this.scene.add.text(0, 0, '', {
+      fontSize: '32px',
+      color: '#ffffff'
     });
-    
-    this.tokenText = this.scene.add.text(16, 56, '', {
-      fontSize: '24px',
-      color: '#9945FF'
+    this.tokenText = this.scene.add.text(0, 0, '', {
+      fontSize: '32px',
+      color: '#ffffff'
+    });
+    this.homeButton = this.scene.add.text(0, 0, 'Home', {
+      fontSize: '32px',
+      color: '#ffffff'
     });
   }
 
-  private createHomeButton() {
-    const buttonWidth = 120;
-    const buttonHeight = 40;
-    const { width } = this.scene.cameras.main;
-    
-    const background = this.scene.add.rectangle(0, 0, buttonWidth, buttonHeight, COLORS.secondary);
-    const text = this.scene.add.text(0, 0, 'Home', {
-      fontSize: '16px',
-      color: '#000000'
-    });
-    
-    text.setOrigin(0.5);
-    
-    this.homeButton = this.scene.add.container(width - buttonWidth/2 - 16, 72, [background, text]);
-    
-    background.setInteractive()
-      .on('pointerover', () => background.setAlpha(0.8))
-      .on('pointerout', () => background.setAlpha(1))
-      .on('pointerdown', () => this.onReturnToMenu());
-  }
-
-  updateLevel(level: number) {
+  public updateLevel(level: number) {
     this.levelText.setText(`Level: ${level}`);
   }
 
-  updateTokens(tokens: number) {
+  public updateTokens(tokens: number) {
     this.tokenText.setText(`Tokens: ${tokens}`);
   }
 
-  resize(width: number, height: number) {
-    this.levelText.setPosition(16, 16);
-    this.tokenText.setPosition(16, 56);
-    this.homeButton.setPosition(width - 76, 72);
+  public showGameOver(score: number) {
+    const { width } = this.scene.cameras.main;
+    const centerX = width / 2;
+
+    const gameOverText = this.scene.add.text(centerX, 200, 'Game Over', {
+      fontSize: '64px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+
+    const scoreText = this.scene.add.text(centerX, 300, `Score: ${score}`, {
+      fontSize: '32px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+
+    const tryAgainButton = this.scene.add.text(centerX, 400, 'Try Again', {
+      fontSize: '32px',
+      color: '#ffffff'
+    })
+    .setOrigin(0.5)
+    .setInteractive()
+    .on('pointerdown', () => {
+      if (this.onTryAgain) {
+        this.onTryAgain();
+      }
+    });
+  }
+
+  public setTryAgainCallback(callback: () => void) {
+    this.onTryAgain = callback;
   }
 }
