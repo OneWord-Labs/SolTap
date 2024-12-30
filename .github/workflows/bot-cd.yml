@@ -2,7 +2,7 @@ name: Bot CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'bot/**'
 
