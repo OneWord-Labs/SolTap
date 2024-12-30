@@ -6,6 +6,10 @@ on:
     paths:
       - 'game/**'
 
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -22,23 +26,23 @@ jobs:
       - name: Pull Vercel Environment Information
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            vercel pull --yes --environment=production --team=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
+            vercel pull --yes --environment=production --scope=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
           else
-            vercel pull --yes --environment=preview --team=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
+            vercel pull --yes --environment=preview --scope=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
           fi
         
       - name: Build Project Artifacts
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            vercel build --prod --team=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
+            vercel build --prod --scope=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
           else
-            vercel build --team=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
+            vercel build --scope=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
           fi
         
       - name: Deploy Project Artifacts to Vercel
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            vercel deploy --prebuilt --prod --team=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
+            vercel deploy --prebuilt --prod --scope=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
           else
-            vercel deploy --prebuilt --team=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
+            vercel deploy --prebuilt --scope=onewordlabs --token=${{ secrets.VERCEL_TOKEN }}
           fi 
