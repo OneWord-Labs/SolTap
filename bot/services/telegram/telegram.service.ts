@@ -33,7 +33,7 @@ export class TelegramService {
     } else {
       // In production, don't create a server - just initialize the bot
       this.bot = new TelegramBot(token);
-      const webhookUrl = `${baseUrl}/api/webhook`;
+      const webhookUrl = `https://${baseUrl}/api/webhook`;
       this.logger.info(`Setting webhook URL to: ${webhookUrl}`);
       
       // Delete any existing webhook first
@@ -148,8 +148,8 @@ export class TelegramService {
           gameUrl: process.env.GAME_URL || 'http://localhost:3000',
           botToken: '✓ Set',
           mode: process.env.NODE_ENV === 'production' ? 'webhook' : 'polling',
-          port: process.env.PORT || 3001,
-          baseUrl: process.env.BASE_URL || 'http://localhost:3001'
+          port: process.env.PORT || 8080,
+          baseUrl: process.env.BASE_URL || 'http://localhost:8080'
         }
       };
     } catch (error) {

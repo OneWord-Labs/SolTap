@@ -2,39 +2,28 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy root package files
+# Copy package files
 COPY package*.json ./
 COPY shared/package*.json ./shared/
 COPY bot/package*.json ./bot/
+COPY game/package*.json ./game/
 
 # Install dependencies
 RUN npm install
-
-# Install TypeScript globally
-RUN npm install -g typescript
+RUN npm install -g typescript vite
 
 # Copy source files
 COPY . .
 
-# Build shared package first, then bot
+# Build shared first, then bot
 RUN npm run build -w shared && npm run build -w bot
 
-# List files in dist directory
-RUN ls -la bot/dist/server/
-
-# Verify the build output exists
-RUN ls -la bot/dist/server/index.js || exit 1
-
-# Expose the port
 EXPOSE 8080
 
-# Set environment variables
-ENV HOST=0.0.0.0
-ENV PORT=8080
-ENV NODE_OPTIONS="--experimental-specifier-resolution=node"
-
-# Set working directory to bot
-WORKDIR /app/bot
+# Set default environment variables
+ENV HOST=0.0.0.0 \
+    PORT=8080 \
+    NODE_ENV=production
 
 # Validate environment variables and run the application
 CMD if [ -z "$TELEGRAM_BOT_TOKEN" ]; then \
@@ -49,4 +38,8 @@ CMD if [ -z "$TELEGRAM_BOT_TOKEN" ]; then \
       echo "Error: GAME_SHORT_NAME is not set"; \
       exit 1; \
     fi; \
-    node dist/server/index.js
+    if [ -z "$GAME_URL" ]; then \
+      echo "Error: GAME_URL is not set"; \
+      exit 1; \
+    fi; \
+    node --experimental-specifier-resolution=node --experimental-modules --es-module-specifier-resolution=node bot/dist/server/index.js
