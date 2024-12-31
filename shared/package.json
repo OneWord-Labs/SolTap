@@ -1,19 +1,21 @@
 {
   "name": "sol-tap-shared",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf dist"
+    "dev": "tsc -w"
   },
   "dependencies": {
-    "typescript": "^5.5.3",
+    "debug": "^4.4.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "rimraf": "^5.0.10"
+    "@types/debug": "^4.1.12",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.5.3"
   }
 } 

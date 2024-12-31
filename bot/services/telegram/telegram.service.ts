@@ -33,7 +33,7 @@ export class TelegramService {
     } else {
       // In production, don't create a server - just initialize the bot
       this.bot = new TelegramBot(token);
-      const webhookUrl = `http://${baseUrl}/api/webhook`;
+      const webhookUrl = `${baseUrl}/api/webhook`;
       this.logger.info(`Setting webhook URL to: ${webhookUrl}`);
       
       // Delete any existing webhook first

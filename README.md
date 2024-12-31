@@ -1,159 +1,134 @@
-Sol Says - Telegram Game Bot Setup Guide
+# SolTap Telegram Bot
+
+A Telegram bot for the SolTap game, built with Node.js, TypeScript, and deployed on fly.io.
 
 ## Project Structure
+
 ```
 .
-├── bot/                 # Telegram bot server
-│   ├── server/         # Server code
-│   ├── .env.production # Production environment variables
-│   └── fly.toml        # Fly.io deployment configuration
-└── game/               # Game frontend
+├── bot/              # Telegram bot server
+├── shared/           # Shared code between bot and game
+└── fly.toml          # Fly.io configuration
 ```
 
-## Critical Configuration Steps
+## Environment Variables
 
-### 1. Telegram Bot Setup
-1. Create bot through @BotFather:
-   - Use `/newbot` command
-   - Set name and username
-   - Save the bot token securely
+Create a `.env` file in the `bot` directory with the following variables:
 
-2. Create game through @BotFather:
-   - Use `/newgame` command
-   - Select your bot
-   - Set game title and description
-   - Upload photo
-   - **IMPORTANT**: Save the game's short name exactly as provided by BotFather
-   - The game short name is case-sensitive and must match exactly
-
-### 2. Environment Variables
-Bot server requires these exact environment variables in `bot/.env.production`:
-```
+```env
 TELEGRAM_BOT_TOKEN=your_bot_token
-BASE_URL=https://soltap-bot.fly.dev
-GAME_URL=https://app.soltap.xyz
-NODE_ENV=production
-GAME_SHORT_NAME=        # Must match BotFather's game short name exactly
-BOT_USERNAME=       # Must match bot's username exactly  t.me/SOL_TAP_bot = SOL_TAP_bot
+BASE_URL=http://localhost:8080 # For local development
+GAME_SHORT_NAME=soltap
+NODE_ENV=development
 ```
 
-### 3. Fly.io Configuration
-In `bot/fly.toml`:
+For production on fly.io, these variables are set using `fly secrets`.
+
+## Local Development
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Build the shared package:
+```bash
+npm run build -w shared
+```
+
+3. Build and run the bot:
+```bash
+npm run build -w bot
+npm run dev -w bot
+```
+
+## Deployment to fly.io
+
+1. Install the Fly CLI:
+```bash
+brew install flyctl
+```
+
+2. Login to Fly:
+```bash
+fly auth login
+```
+
+3. Create a new app (first time only):
+```bash
+fly launch
+```
+
+4. Set required secrets:
+```bash
+fly secrets set TELEGRAM_BOT_TOKEN=your_bot_token
+fly secrets set BASE_URL=https://your-app.fly.dev
+fly secrets set GAME_SHORT_NAME=soltap
+fly secrets set NODE_ENV=production
+```
+
+5. Deploy:
+```bash
+fly deploy
+```
+
+## Important Configuration Notes
+
+### ES Modules
+The project uses ES modules. Key configurations:
+- `"type": "module"` in package.json
+- Proper `.js` extensions in imports
+- TypeScript configured for ES modules
+
+### Fly.io Configuration
+Key settings in `fly.toml`:
 ```toml
-app = "soltap-bot"             # Must match your fly.io app name
-primary_region = "lax"
-
-[build]
-  dockerfile = "Dockerfile"
-
-[env]
-  NODE_ENV = "production"
-  PORT = "3001"
-
 [http_service]
-  internal_port = 3001
+  internal_port = 8080
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = false  # Prevents machine from stopping
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
 ```
 
-## Deployment Process
+### Docker Configuration
+The Dockerfile is configured to:
+1. Use Node.js 18 Alpine
+2. Install dependencies
+3. Build TypeScript code
+4. Run the server
 
-1. Set up Fly.io secrets:
-```bash
-fly secrets set \
-  TELEGRAM_BOT_TOKEN="your_bot_token" \
-  BASE_URL="https://soltap-bot.fly.dev" \
-  GAME_URL="https://app.soltap.xyz" \
-  GAME_SHORT_NAME="solsays" \
-  BOT_USERNAME="SolSays_bot" \
-  -a soltap-bot
-```
+## API Endpoints
 
-2. Deploy:
-```bash
-cd bot
-fly deploy
-```
+- `/api/webhook`: Telegram webhook endpoint
+- `/game`: Serves the game
 
-3. Verify deployment:
-```bash
-fly status -a soltap-bot
-fly logs -a soltap-bot
-```
+## Troubleshooting
 
-## Common Issues and Solutions
+1. **Bot Not Responding**
+   - Check machine status: `fly status`
+   - View logs: `fly logs`
+   - Restart machine: `fly machine restart [machine-id]`
 
-### 1. Wrong Game Short Name
-- Error: "wrong game short name specified"
-- Solution: 
-  - Check game short name with @BotFather
-  - Use EXACTLY the same name (case-sensitive)
-  - Update both .env.production and fly.io secrets
+2. **Webhook Issues**
+   - Verify webhook URL matches BASE_URL
+   - Check Telegram webhook info
+   - Ensure SSL certificate is valid
 
-### 2. Port Conflicts
-If deployment fails with port conflicts:
-```bash
-# Force destroy existing machine
-fly machine destroy --force MACHINE_ID -a soltap-bot
-# Then redeploy
-fly deploy
-```
+3. **ES Module Errors**
+   - Verify import statements use `.js` extension
+   - Check tsconfig.json module settings
+   - Ensure package.json has `"type": "module"`
 
-### 3. Webhook Issues
-- Verify webhook status:
-```bash
-curl -X GET "https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo"
-```
-- Bot automatically sets webhook on startup
-- Webhook URL must be HTTPS
-- Webhook URL must match BASE_URL/api/webhook
+## Deployment Checklist
 
-## Development Setup
+1. [ ] All environment variables set
+2. [ ] Built and tested locally
+3. [ ] Webhook URL configured correctly
+4. [ ] auto_stop_machines disabled
+5. [ ] SSL certificate valid
+6. [ ] Logs showing no errors
 
-1. Clone repository
-2. Create `.env` file in bot directory with development settings
-3. Install dependencies:
-```bash
-cd bot
-npm install
-cd ../game
-npm install
-```
+## License
 
-4. Start development servers:
-```bash
-# Bot server
-cd bot
-npm run dev
-
-# Game frontend
-cd game
-npm run dev
-```
-
-## Critical Reminders
-
-1. Never change the app name in fly.toml without proper migration
-2. Always verify game short name with BotFather before deployment
-3. Keep production and staging environments completely separate
-4. Always check logs after deployment
-5. Maintain separate bots for staging and production
-
-## Troubleshooting Checklist
-
-1. Verify environment variables match exactly
-2. Confirm game short name with BotFather
-3. Check webhook configuration
-4. Verify fly.io app name matches deployment
-5. Check server logs for specific errors
-6. Verify all secrets are set in fly.io
-7. Ensure bot has correct permissions
-
-## Backup and Recovery
-
-1. Keep backup of working configuration files
-2. Document all environment variables
-3. Save BotFather responses with critical information
-4. Maintain deployment history in fly.io
+MIT

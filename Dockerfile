@@ -1,44 +1,50 @@
-# syntax = docker/dockerfile:1
-
-# Adjust NODE_VERSION as desired
-ARG NODE_VERSION=20.11.1
-FROM node:${NODE_VERSION}-slim as base
-
-LABEL fly_launch_runtime="NodeJS"
-
-# NodeJS app lives here
+FROM node:18-slim as base
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV=production
-
-
-# Throw-away build stage to reduce size of final image
 FROM base as build
-
-# Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
+    apt-get install -y python-is-python3 pkg-config build-essential
 
-# Install node modules
-COPY --link package.json package-lock.json .
+# Install TypeScript and type definitions globally
+RUN npm install -g typescript @types/node
+
+# Copy package files
+COPY package*.json ./
 RUN npm install --production=false
 
-# Copy application code
-COPY --link . .
+# Install additional dependencies
+RUN npm install --save-dev @types/node zod debug @types/debug @types/express @types/cors @types/node-telegram-bot-api
 
-# Build application
-RUN npm run build
+# Create game directory and install dependencies
+RUN mkdir -p game
+COPY game/package*.json game/
+RUN cd game && npm install --save-dev vite @vitejs/plugin-react
 
-# Remove development dependencies
-RUN npm prune --production
+# Copy source files
+COPY . .
 
+# Build the application
+RUN npm run build -w bot
 
-# Final stage for app image
 FROM base
+COPY --from=build /app/bot/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY package*.json ./
+COPY bot/package.json ./bot/package.json
 
-# Copy built application
-COPY --from=build /app /app
+EXPOSE 8080
 
-# Start the server by default, this can be overwritten at runtime
-CMD [ "npm", "run", "start" ]
+# Add environment check and run with proper ES module flags
+CMD if [ -z "$TELEGRAM_BOT_TOKEN" ]; then \
+      echo "Error: TELEGRAM_BOT_TOKEN is not set"; \
+      exit 1; \
+    fi; \
+    if [ -z "$BASE_URL" ]; then \
+      echo "Error: BASE_URL is not set"; \
+      exit 1; \
+    fi; \
+    if [ -z "$GAME_SHORT_NAME" ]; then \
+      echo "Error: GAME_SHORT_NAME is not set"; \
+      exit 1; \
+    fi; \
+    node --experimental-specifier-resolution=node --experimental-modules dist/server/index.js

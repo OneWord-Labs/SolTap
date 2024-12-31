@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import 'dotenv/config.js';
 import express, { Request, Response, Router, RequestHandler } from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -21,7 +21,7 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 }
 
 // Middleware
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: Function) => {
   logger.info(`Incoming request: ${req.method} ${req.url}`);
   next();
 });
