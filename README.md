@@ -1,4 +1,4 @@
-# Sol Says - Telegram Game Bot Setup Guide
+Sol Says - Telegram Game Bot Setup Guide
 
 ## Project Structure
 ```
@@ -33,8 +33,8 @@ TELEGRAM_BOT_TOKEN=your_bot_token
 BASE_URL=https://soltap-bot.fly.dev
 GAME_URL=https://app.soltap.xyz
 NODE_ENV=production
-GAME_SHORT_NAME=solsays        # Must match BotFather's game short name exactly
-BOT_USERNAME=SolSays_bot       # Must match bot's username exactly
+GAME_SHORT_NAME=        # Must match BotFather's game short name exactly
+BOT_USERNAME=       # Must match bot's username exactly  t.me/SOL_TAP_bot = SOL_TAP_bot
 ```
 
 ### 3. Fly.io Configuration
