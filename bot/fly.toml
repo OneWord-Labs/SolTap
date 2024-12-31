@@ -11,10 +11,10 @@ primary_region = "lax"
 
 [env]
   NODE_ENV = "production"
-  PORT = "3001"
+  PORT = "8080"
 
 [http_service]
-  internal_port = 3001
+  internal_port = 8080
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
@@ -23,21 +23,15 @@ primary_region = "lax"
 
 [[services]]
   protocol = "tcp"
-  internal_port = 3001
-  processes = ["app"]
+  internal_port = 8080
+  ports = [
+    { port = 80 },
+    { port = 443 }
+  ]
 
-  [[services.ports]]
-    port = 80
-    handlers = ["http"]
-  [[services.ports]]
-    port = 443
-    handlers = ["tls", "http"]
-  [services.concurrency]
-    type = "connections"
-    hard_limit = 25
-    soft_limit = 20
-
-  [[services.tcp_checks]]
-    interval = "15s"
-    timeout = "2s"
-    grace_period = "1s"
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/api/health"

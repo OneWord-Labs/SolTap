@@ -16,8 +16,6 @@
     "@types/cors": "^2.8.17",
     "@types/dotenv": "^8.2.3",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.10.2",
-    "@types/node-telegram-bot-api": "^0.64.0",
     "cors": "^2.8.5",
     "debug": "^4.4.0",
     "dotenv": "^16.4.7",
@@ -33,6 +31,8 @@
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.9",
     "@types/debug": "^4.1.12",
+    "@types/node": "^22.10.2",
+    "@types/node-telegram-bot-api": "^0.64.7",
     "typescript-eslint": "^8.3.0"
   }
-} 
+}
