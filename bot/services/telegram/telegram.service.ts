@@ -31,8 +31,9 @@ export class TelegramService {
       this.bot = new TelegramBot(token, { polling: true });
       this.logger.info('Bot started in polling mode (development)');
     } else {
-      this.bot = new TelegramBot(token, { webHook: { port: parseInt(process.env.PORT || '3001', 10) } });
-      const webhookUrl = `${baseUrl}/api/webhook`;
+      // In production, don't create a server - just initialize the bot
+      this.bot = new TelegramBot(token);
+      const webhookUrl = `https://${baseUrl}/api/webhook`;
       this.logger.info(`Setting webhook URL to: ${webhookUrl}`);
       
       // Delete any existing webhook first
