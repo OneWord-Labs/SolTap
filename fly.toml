@@ -1,4 +1,4 @@
-app = "soltap-bot-main"
+app = "soltap-bot-preview"
 primary_region = "lax"
 
 [build]
@@ -20,4 +20,4 @@ primary_region = "lax"
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
-  memory_mb = 256 
+  memory_mb = 1024 
