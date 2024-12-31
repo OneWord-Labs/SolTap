@@ -126,3 +126,8 @@ process.on('SIGTERM', () => {
     logger.info('HTTP server closed');
   });
 });
+
+// Trigger deployment - update cache path
+import express from 'express';
+import cors from 'cors';
+import { TelegramService } from '../services/telegram/telegram.service.js';
