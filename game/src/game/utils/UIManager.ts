@@ -1,70 +1,58 @@
 import Phaser from 'phaser';
-import { COLORS, REWARDS } from '../constants';
+import { COLORS } from '../constants';
 
 export class UIManager {
-  private scene: Phaser.Scene;
-  private levelText: Phaser.GameObjects.Text;
-  private tokenText: Phaser.GameObjects.Text;
-  private homeButton: Phaser.GameObjects.Container;
-  private onTryAgain: () => void;
-  private onReturnToMenu: () => void;
+    private scene: Phaser.Scene;
+    private levelText: Phaser.GameObjects.Text;
+    private tokenText: Phaser.GameObjects.Text;
+    private playerNameText: Phaser.GameObjects.Text;
+    private highScoreText: Phaser.GameObjects.Text;
 
-  constructor(scene: Phaser.Scene, onTryAgain: () => void, onReturnToMenu: () => void) {
-    this.scene = scene;
-    this.onTryAgain = onTryAgain;
-    this.onReturnToMenu = onReturnToMenu;
-    this.createUI();
-  }
+    constructor(scene: Phaser.Scene, onTryAgain: () => void, onMenu: () => void) {
+        this.scene = scene;
+        
+        // Create UI elements
+        const { width, height } = scene.cameras.main;
+        
+        this.levelText = scene.add.text(20, 20, 'Level: 1', {
+            fontSize: '24px',
+            color: '#ffffff'
+        });
 
-  private createUI() {
-    this.createTexts();
-    this.createHomeButton();
-  }
+        this.tokenText = scene.add.text(20, 60, 'Points: 0', {
+            fontSize: '24px',
+            color: '#ffffff'
+        });
 
-  private createTexts() {
-    this.levelText = this.scene.add.text(16, 16, '', {
-      fontSize: '24px',
-      color: '#14F195'
-    });
-    
-    this.tokenText = this.scene.add.text(16, 56, '', {
-      fontSize: '24px',
-      color: '#9945FF'
-    });
-  }
+        this.playerNameText = scene.add.text(width - 20, 20, '', {
+            fontSize: '24px',
+            color: '#ffffff'
+        }).setOrigin(1, 0);
 
-  private createHomeButton() {
-    const buttonWidth = 120;
-    const buttonHeight = 40;
-    const { width } = this.scene.cameras.main;
-    
-    const background = this.scene.add.rectangle(0, 0, buttonWidth, buttonHeight, COLORS.secondary);
-    const text = this.scene.add.text(0, 0, 'Home', {
-      fontSize: '16px',
-      color: '#000000'
-    });
-    
-    text.setOrigin(0.5);
-    
-    this.homeButton = this.scene.add.container(width - buttonWidth/2 - 16, 72, [background, text]);
-    
-    background.setInteractive()
-      .on('pointerover', () => background.setAlpha(0.8))
-      .on('pointerout', () => background.setAlpha(1))
-      .on('pointerdown', () => this.onReturnToMenu());
-  }
+        this.highScoreText = scene.add.text(width - 20, 60, 'High Score: 0', {
+            fontSize: '24px',
+            color: '#ffffff'
+        }).setOrigin(1, 0);
+    }
 
-  updateLevel(level: number) {
-    this.levelText.setText(`Level: ${level}`);
-  }
+    setPlayerName(username: string): void {
+        this.playerNameText.setText(`Player: ${username}`);
+    }
 
-  updateTokens(tokens: number) {
-    this.tokenText.setText(`Tokens: ${tokens}`);
-  }
+    updateHighScore(score: number): void {
+        this.highScoreText.setText(`High Score: ${score}`);
+    }
 
-  resize(width: number, height: number) {
-    this.levelText.setPosition(16, 16);
-    this.tokenText.setPosition(16, 56);
-    this.homeButton.setPosition(width - 76, 72);
-  }
+    updateLevel(level: number): void {
+        this.levelText.setText(`Level: ${level}`);
+    }
+
+    updateTokens(tokens: number): void {
+        this.tokenText.setText(`Points: ${tokens}`);
+    }
+
+    resize(width: number, height: number): void {
+        this.playerNameText.setPosition(width - 20, 20);
+        this.highScoreText.setPosition(width - 20, 60);
+    }
 }

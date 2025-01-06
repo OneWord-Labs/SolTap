@@ -12,6 +12,8 @@ import { PatternManager } from '../utils/PatternManager';
 import { CountdownManager } from '../utils/CountdownManager';
 import { Logger } from '../../utils/Logger';
 import { Circle } from '../components/Circle';
+import { PointsService } from '../../services/PointsService';
+import environment from '../../config/environment';
 
 export default class MainScene extends Phaser.Scene {
     private patterns: Pattern[] = [];
@@ -21,6 +23,7 @@ export default class MainScene extends Phaser.Scene {
     private canInput = false;
     private difficulty: DifficultyMode = 'novice';
     private isShowingPattern = false;
+    private pointsService: PointsService;
 
     // Managers
     private audioManager!: AudioManager;
@@ -36,6 +39,13 @@ export default class MainScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MainScene' });
         this.logger = new Logger('MainScene');
+        
+        // Initialize PointsService with environment variables
+        this.pointsService = new PointsService(
+            environment.supabase.url,
+            environment.supabase.anonKey,
+            environment.telegram.botUsername // Using bot username as user ID for now
+        );
     }
 
     init(data: { difficulty: DifficultyMode }) {
@@ -47,9 +57,19 @@ export default class MainScene extends Phaser.Scene {
         this.canInput = false;
     }
 
-    create() {
+    async create() {
         this.setupManagers();
         this.setupEventListeners();
+        
+        // Initialize user data first
+        const user = await this.pointsService.init();
+        if (user) {
+            this.logger.info(`Game started for user: ${user.username}`);
+            // Update UI with username
+            this.uiManager.setPlayerName(user.username);
+        }
+        
+        await this.pointsService.startSession();
         this.startGame();
     }
 
@@ -173,8 +193,15 @@ export default class MainScene extends Phaser.Scene {
     private async handleSuccess() {
         this.canInput = false;
         await this.transitionManager.showSuccess();
-        this.rewardSystem.calculateReward(this.currentLevel, true);
+        const reward = this.rewardSystem.calculateReward(this.currentLevel, true);
+        await this.pointsService.updateScore(reward);
         this.currentLevel++;
+        
+        const user = this.pointsService.getCurrentUser();
+        if (user) {
+            this.uiManager.updateHighScore(user.highest_score);
+        }
+        
         this.uiManager.updateTokens(this.rewardSystem.getTokenBalance());
         await this.startNewLevel();
     }
@@ -183,13 +210,22 @@ export default class MainScene extends Phaser.Scene {
         this.canInput = false;
         await this.transitionManager.showFailure();
         if (this.rewardSystem.deductTryAgainCost()) {
-            this.uiManager.updateTokens(this.rewardSystem.getTokenBalance());
+            const currentBalance = this.rewardSystem.getTokenBalance();
+            await this.pointsService.updateScore(currentBalance);
+            this.uiManager.updateTokens(currentBalance);
             this.playerPattern = [];
             await this.showPattern();
             this.canInput = true;
         } else {
-            this.returnToMenu();
+            await this.endGame();
         }
+    }
+
+    private async endGame() {
+        const finalScore = this.rewardSystem.getTokenBalance();
+        await this.pointsService.endSession(finalScore);
+        await this.pointsService.convertPoints(finalScore);
+        this.scene.start('MenuScene');
     }
 
     private handleTryAgain() {
