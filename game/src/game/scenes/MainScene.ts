@@ -59,13 +59,30 @@ export default class MainScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MainScene' });
         this.logger = new Logger('MainScene');
+        // Simulate Telegram WebApp for testing
+        if (!window.Telegram?.WebApp) {
+            window.Telegram = {
+                WebApp: {
+                    ready: () => {},
+                    close: () => {},
+                    sendData: (data: string) => { console.log('Sending data:', data); },
+                    initData: '',
+                    initDataUnsafe: {
+                        user: {
+                            id: 12345,
+                            first_name: 'Test User',
+                            username: 'testuser'
+                        }
+                    }
+                }
+            };
+        }
         // Initialize Telegram WebApp
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.ready();
-            const { user } = window.Telegram.WebApp.initDataUnsafe;
-            if (user) {
-                this.userName = user.first_name;
-            }
+        window.Telegram.WebApp.ready();
+        const { user } = window.Telegram.WebApp.initDataUnsafe;
+        if (user) {
+            this.userName = user.first_name;
+            this.logger.log('User name set:', this.userName);
         }
     }
 
@@ -91,7 +108,6 @@ export default class MainScene extends Phaser.Scene {
     create() {
         this.setupManagers();
         this.setupEventListeners();
-        this.showWelcomeMessage();
         this.startGame();
     }
 
@@ -108,6 +124,13 @@ export default class MainScene extends Phaser.Scene {
             () => this.returnToMenu()
         );
         this.countdownManager = new CountdownManager(this);
+
+        // Initialize UI values immediately
+        this.uiManager.updateLevel(this.currentLevel);
+        this.uiManager.updateTokens(this.rewardSystem.getTokenBalance());
+        if (this.userName) {
+            this.uiManager.updateUserName(this.userName);
+        }
 
         // Create circles
         this.circles = this.circleManager.createCircles(
@@ -156,6 +179,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     private async startGame() {
+        // Start countdown after UI is ready
         await this.countdownManager.startCountdown();
         this.startNewLevel();
     }
@@ -165,6 +189,7 @@ export default class MainScene extends Phaser.Scene {
         this.playerPattern = [];
         this.canInput = false;
 
+        // Update UI immediately for new level
         this.uiManager.updateLevel(this.currentLevel);
         this.uiManager.updateTokens(this.rewardSystem.getTokenBalance());
 
@@ -265,40 +290,14 @@ export default class MainScene extends Phaser.Scene {
     }
 
     private returnToMenu() {
+        this.logger.log('Returning to menu');
         // Close Telegram WebApp if it exists
         if (window.Telegram?.WebApp) {
+            this.logger.log('Closing Telegram WebApp');
             window.Telegram.WebApp.close();
-        } else {
-            this.scene.start('MenuScene');
         }
-    }
-
-    private showWelcomeMessage() {
-        if (this.userName) {
-            const welcomeText = this.add.text(
-                this.cameras.main.centerX,
-                100,
-                `Welcome, ${this.userName}! 👋`,
-                {
-                    fontFamily: 'Arial',
-                    fontSize: '32px',
-                    color: '#ffffff',
-                    align: 'center'
-                }
-            );
-            welcomeText.setOrigin(0.5);
-            
-            // Fade out after 3 seconds
-            this.tweens.add({
-                targets: welcomeText,
-                alpha: 0,
-                duration: 1000,
-                delay: 2000,
-                onComplete: () => {
-                    welcomeText.destroy();
-                }
-            });
-        }
+        this.logger.log('Starting MenuScene');
+        this.scene.start('MenuScene');
     }
 
     update() {

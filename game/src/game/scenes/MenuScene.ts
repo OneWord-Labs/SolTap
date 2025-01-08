@@ -5,6 +5,7 @@ import { DifficultyMode } from '../types';
 export class MenuScene extends Phaser.Scene {
   private title!: Phaser.GameObjects.Text;
   private buttons: Phaser.GameObjects.Text[] = [];
+  private welcomeText!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'MenuScene' });
@@ -18,8 +19,20 @@ export class MenuScene extends Phaser.Scene {
   private createMenuElements() {
     const { width, height } = this.cameras.main;
     
-    // Title - positioned at 25% of screen height
-    this.title = this.add.text(width / 2, height * 0.25, 'Sol Tap', {
+    // Welcome message - positioned at 15% of screen height
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name) {
+      const userName = window.Telegram.WebApp.initDataUnsafe.user.first_name;
+      this.welcomeText = this.add.text(width / 2, height * 0.15, `Welcome, ${userName}! 👋`, {
+        fontSize: this.calculateFontSize(36),
+        color: '#FFFFFF',
+        fontFamily: 'Arial',
+        fontStyle: 'bold',
+        align: 'center'
+      }).setOrigin(0.5);
+    }
+    
+    // Title - positioned at 35% of screen height
+    this.title = this.add.text(width / 2, height * 0.35, 'Sol Tap', {
       fontSize: this.calculateFontSize(48),
       color: '#14F195',
       fontFamily: 'Arial',
