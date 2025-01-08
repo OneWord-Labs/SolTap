@@ -13,6 +13,26 @@ import { CountdownManager } from '../utils/CountdownManager';
 import { Logger } from '../../utils/Logger';
 import { Circle } from '../components/Circle';
 
+declare global {
+    interface Window {
+        Telegram?: {
+            WebApp: {
+                ready(): void;
+                close(): void;
+                sendData(data: string): void;
+                initData: string;
+                initDataUnsafe: {
+                    user?: {
+                        id: number;
+                        username?: string;
+                        first_name: string;
+                    };
+                };
+            };
+        };
+    }
+}
+
 export default class MainScene extends Phaser.Scene {
     private patterns: Pattern[] = [];
     private playerPattern: Pattern[] = [];
@@ -21,6 +41,9 @@ export default class MainScene extends Phaser.Scene {
     private canInput = false;
     private difficulty: DifficultyMode = 'novice';
     private isShowingPattern = false;
+    private score = 0;
+    private coins = 0;
+    private userName: string = '';
 
     // Managers
     private audioManager!: AudioManager;
@@ -36,6 +59,14 @@ export default class MainScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MainScene' });
         this.logger = new Logger('MainScene');
+        // Initialize Telegram WebApp
+        if (window.Telegram?.WebApp) {
+            window.Telegram.WebApp.ready();
+            const { user } = window.Telegram.WebApp.initDataUnsafe;
+            if (user) {
+                this.userName = user.first_name;
+            }
+        }
     }
 
     init(data: { difficulty: DifficultyMode }) {
@@ -45,11 +76,22 @@ export default class MainScene extends Phaser.Scene {
         this.playerPattern = [];
         this.isShowingPattern = false;
         this.canInput = false;
+        this.score = 0;
+        this.coins = 0;
+
+        // Get user name from Telegram if not already set
+        if (!this.userName && window.Telegram?.WebApp) {
+            const { user } = window.Telegram.WebApp.initDataUnsafe;
+            if (user) {
+                this.userName = user.first_name;
+            }
+        }
     }
 
     create() {
         this.setupManagers();
         this.setupEventListeners();
+        this.showWelcomeMessage();
         this.startGame();
     }
 
@@ -173,22 +215,44 @@ export default class MainScene extends Phaser.Scene {
     private async handleSuccess() {
         this.canInput = false;
         await this.transitionManager.showSuccess();
-        this.rewardSystem.calculateReward(this.currentLevel, true);
+        const reward = this.rewardSystem.calculateReward(this.currentLevel, true);
+        this.score += reward;
+        this.coins += Math.floor(reward / 10); // Convert some points to coins
         this.currentLevel++;
         this.uiManager.updateTokens(this.rewardSystem.getTokenBalance());
+        
+        // Send score update to Telegram bot
+        this.sendScoreToBot();
+        
         await this.startNewLevel();
     }
 
     private async handleFailure() {
         this.canInput = false;
         await this.transitionManager.showFailure();
-        if (this.rewardSystem.deductTryAgainCost()) {
-            this.uiManager.updateTokens(this.rewardSystem.getTokenBalance());
-            this.playerPattern = [];
-            await this.showPattern();
-            this.canInput = true;
-        } else {
+        
+        // Send final score to bot on game over
+        if (!this.rewardSystem.deductTryAgainCost()) {
+            this.sendScoreToBot();
             this.returnToMenu();
+            return;
+        }
+        
+        this.uiManager.updateTokens(this.rewardSystem.getTokenBalance());
+        this.playerPattern = [];
+        await this.showPattern();
+        this.canInput = true;
+    }
+
+    private sendScoreToBot() {
+        if (window.Telegram?.WebApp) {
+            const gameData = {
+                score: this.score,
+                level: this.currentLevel,
+                coins: this.coins,
+                difficulty: this.difficulty
+            };
+            window.Telegram.WebApp.sendData(JSON.stringify(gameData));
         }
     }
 
@@ -201,7 +265,40 @@ export default class MainScene extends Phaser.Scene {
     }
 
     private returnToMenu() {
-        this.scene.start('MenuScene');
+        // Close Telegram WebApp if it exists
+        if (window.Telegram?.WebApp) {
+            window.Telegram.WebApp.close();
+        } else {
+            this.scene.start('MenuScene');
+        }
+    }
+
+    private showWelcomeMessage() {
+        if (this.userName) {
+            const welcomeText = this.add.text(
+                this.cameras.main.centerX,
+                100,
+                `Welcome, ${this.userName}! 👋`,
+                {
+                    fontFamily: 'Arial',
+                    fontSize: '32px',
+                    color: '#ffffff',
+                    align: 'center'
+                }
+            );
+            welcomeText.setOrigin(0.5);
+            
+            // Fade out after 3 seconds
+            this.tweens.add({
+                targets: welcomeText,
+                alpha: 0,
+                duration: 1000,
+                delay: 2000,
+                onComplete: () => {
+                    welcomeText.destroy();
+                }
+            });
+        }
     }
 
     update() {
