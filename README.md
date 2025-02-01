@@ -139,6 +139,94 @@ fly status
 fly logs
 ```
 
+## Game Deployment to Vercel
+
+### Prerequisites
+1. [ ] Vercel CLI installed (`npm i -g vercel`)
+2. [ ] Vercel account with access to the project
+3. [ ] Domain access for game.soltap.ai
+4. [ ] Existing www.soltap.ai deployment untouched
+
+### Game Deployment Steps
+
+1. Create new Vercel project (first time only):
+```bash
+# Navigate to game directory
+cd game
+
+# Create new project
+vercel init
+```
+
+2. Configure project settings:
+- Project name: soltap-game
+- Framework preset: Vite
+- Build Command: `npm run build -w game`
+- Output Directory: `game/dist`
+
+3. Set environment variables:
+```bash
+vercel env add VITE_API_URL
+vercel env add VITE_GAME_SHORT_NAME
+# Add other required environment variables
+```
+
+4. Configure domain:
+```bash
+# Add game subdomain
+vercel domains add game.soltap.ai
+```
+
+5. Deploy:
+```bash
+# Deploy to preview
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+6. Verify deployment:
+- Check game.soltap.ai accessibility
+- Test game functionality
+- Verify Telegram bot integration
+
+### Important Notes for Game Deployment
+
+1. **Separate Projects**
+   - Keep game deployment separate from www.soltap.ai
+   - Use different project IDs and configurations
+   - Maintain separate environment variables
+
+2. **Domain Configuration**
+   - game.soltap.ai requires separate DNS configuration
+   - CNAME record pointing to cname.vercel-dns.com
+   - SSL certificate will be handled by Vercel
+
+3. **Build Configuration**
+   - Ensure all dependencies are properly installed
+   - Verify build output in game/dist directory
+   - Check for any build-time environment variables
+
+4. **Post-Deployment Verification**
+   - Test game functionality
+   - Verify API connections
+   - Check Telegram bot integration
+   - Monitor error logs
+
+### Game Deployment Checklist
+
+1. [ ] Vercel CLI installed and configured
+2. [ ] New project created for game only
+3. [ ] Environment variables set
+4. [ ] Domain configured correctly
+5. [ ] Build succeeds locally
+6. [ ] Dependencies properly installed
+7. [ ] API endpoints configured
+8. [ ] SSL/HTTPS properly configured
+9. [ ] Telegram bot updated with new game URL
+10. [ ] Monitoring and logging set up
+
 ## Important Configuration Notes
 
 ### ES Modules
