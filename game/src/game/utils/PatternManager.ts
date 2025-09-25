@@ -1,4 +1,4 @@
-import { Pattern, DifficultyMode } from '../types';
+import { Pattern, DifficultyMode, GameMode } from '../types';
 import { Circle } from '../components/Circle';
 import { AudioManager } from './audioManager';
 import { GAME_CONFIG } from '../constants';
@@ -9,21 +9,23 @@ export class PatternManager {
     private circles: Circle[];
     private audioManager: AudioManager;
     private difficulty: DifficultyMode;
+    private gameMode: GameMode;
     private logger: Logger;
 
-    constructor(scene: Phaser.Scene, circles: Circle[], audioManager: AudioManager, difficulty: DifficultyMode) {
+    constructor(scene: Phaser.Scene, circles: Circle[], audioManager: AudioManager, difficulty: DifficultyMode, gameMode: GameMode = 'normal') {
         this.scene = scene;
         this.circles = circles;
         this.audioManager = audioManager;
         this.difficulty = difficulty;
+        this.gameMode = gameMode;
         this.logger = new Logger('PatternManager');
     }
 
     async showPattern(patterns: Pattern[]): Promise<void> {
         this.logger.info('Showing pattern:', patterns);
-        
+
         for (const pattern of patterns) {
-            await this.delay(GAME_CONFIG.patternShowDelay);
+            await this.delay(this.getAdjustedDelay(GAME_CONFIG.patternShowDelay));
             await this.showSinglePattern(pattern);
         }
     }
@@ -46,23 +48,32 @@ export class PatternManager {
 
     private async showTapPattern(circle: Circle): Promise<void> {
         this.audioManager.playTapSound(this.circles.indexOf(circle));
-        await circle.activate(300);
+        await circle.activate(this.getAdjustedDuration(300));
     }
 
     private async showHoldPattern(circle: Circle, duration: number): Promise<void> {
         this.audioManager.playHoldSound(this.circles.indexOf(circle));
-        await circle.activate(duration);
+        await circle.activate(this.getAdjustedDuration(duration));
     }
 
     private async showRapidPattern(circle: Circle, count: number): Promise<void> {
         for (let i = 0; i < count; i++) {
             this.audioManager.playRapidSound(this.circles.indexOf(circle));
-            await circle.activate(150);
-            await this.delay(100);
+            await circle.activate(this.getAdjustedDuration(150));
+            await this.delay(this.getAdjustedDelay(100));
         }
     }
 
     private delay(ms: number): Promise<void> {
         return new Promise(resolve => this.scene.time.delayedCall(ms, resolve));
     }
+
+    private getAdjustedDelay(baseDelay: number): number {
+        return baseDelay;
+    }
+
+    private getAdjustedDuration(baseDuration: number): number {
+        return baseDuration;
+    }
+
 }

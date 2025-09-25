@@ -42,11 +42,74 @@ export class SoundManager {
             if (!this.isInitialized) {
                 await this.initializeSynth();
             }
-            
+
             const note = this.notes[dotIndex % this.notes.length];
             this.synth?.triggerAttackRelease(note, '0.2', Tone.now());
         } catch (error) {
             this.logger.error('Error playing dot sound:', error);
+        }
+    }
+
+    async playComboSound(comboCount: number): Promise<void> {
+        try {
+            if (!this.isInitialized) {
+                await this.initializeSynth();
+            }
+
+            // Play ascending arpeggio for combos 3+
+            if (comboCount >= 3) {
+                const baseNoteIndex = Math.min(Math.floor(comboCount / 3), 8);
+                const chordNotes = [
+                    this.notes[baseNoteIndex],
+                    this.notes[baseNoteIndex + 2],
+                    this.notes[baseNoteIndex + 4]
+                ];
+
+                chordNotes.forEach((note, index) => {
+                    this.synth?.triggerAttackRelease(note, '0.3', Tone.now() + (index * 0.1));
+                });
+            }
+        } catch (error) {
+            this.logger.error('Error playing combo sound:', error);
+        }
+    }
+
+    async playMilestoneSound(milestone: number): Promise<void> {
+        try {
+            if (!this.isInitialized) {
+                await this.initializeSynth();
+            }
+
+            // Play celebratory ascending scale
+            const startNote = 8; // Higher octave for celebration
+            const scale = [0, 2, 4, 5, 7, 9, 11, 12]; // Major scale
+
+            scale.forEach((offset, index) => {
+                const noteIndex = (startNote + offset) % this.notes.length;
+                this.synth?.triggerAttackRelease(
+                    this.notes[noteIndex],
+                    '0.4',
+                    Tone.now() + (index * 0.15)
+                );
+            });
+        } catch (error) {
+            this.logger.error('Error playing milestone sound:', error);
+        }
+    }
+
+    async playComboBreakSound(): Promise<void> {
+        try {
+            if (!this.isInitialized) {
+                await this.initializeSynth();
+            }
+
+            // Play descending chromatic notes for "failure" sound
+            const breakNotes = ['C5', 'B4', 'Bb4', 'A4'];
+            breakNotes.forEach((note, index) => {
+                this.synth?.triggerAttackRelease(note, '0.2', Tone.now() + (index * 0.1));
+            });
+        } catch (error) {
+            this.logger.error('Error playing combo break sound:', error);
         }
     }
 

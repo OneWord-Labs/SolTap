@@ -8,11 +8,24 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  /* Prevent text selection in game */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Improve touch performance */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  /* Support for safe areas on notched devices */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 #root {
   width: 100%;
   height: 100%;
+  /* Ensure root covers safe area */
+  height: 100vh;
+  height: -webkit-fill-available;
 }
 
 #game-container {
@@ -21,4 +34,36 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Ensure container fills available space */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* Responsive breakpoints for different device types */
+@media screen and (max-width: 480px) {
+  /* Mobile portrait */
+  body {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 896px) and (orientation: landscape) {
+  /* Mobile landscape */
+  body {
+    font-size: 12px;
+  }
+}
+
+@media screen and (min-width: 481px) and (max-width: 1024px) {
+  /* Tablet */
+  body {
+    font-size: 16px;
+  }
+}
+
+@media screen and (min-width: 1025px) {
+  /* Desktop */
+  body {
+    font-size: 18px;
+  }
 }

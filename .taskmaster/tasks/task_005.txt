@@ -1,0 +1,11 @@
+# Task ID: 5
+# Title: Add Pattern Variations
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Implement double-tap, hold, and simultaneous multi-circle patterns
+# Details:
+Extend pattern system to support: Double-tap patterns (require two rapid taps on same circle), Hold patterns (press and hold for specified duration with visual timer), Simultaneous patterns (multiple circles must be tapped within 200ms window). Update pattern generator to include these variations.
+
+# Test Strategy:
+Test pattern recognition for each variation, verify timing windows, test edge cases and pattern combinations

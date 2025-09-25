@@ -3,6 +3,8 @@ import Phaser from 'phaser';
 import MainScene from './game/scenes/MainScene';
 import { MenuScene } from './game/scenes/MenuScene';
 import { GAME_CONFIG } from './game/constants';
+import { DeviceDetector } from './game/utils/DeviceDetector';
+import { ResponsiveConfig } from './game/utils/ResponsiveConfig';
 
 declare global {
   interface Window {
@@ -34,7 +36,18 @@ function App() {
       console.log('Telegram WebApp initialized with user:', window.Telegram.WebApp.initDataUnsafe.user);
     }
 
-    // Initialize game configuration
+    // Initialize device detection and responsive configuration
+    const deviceDetector = DeviceDetector.getInstance();
+    const responsiveConfig = ResponsiveConfig.getInstance();
+    const deviceInfo = deviceDetector.getDeviceInfo();
+
+    console.log('Device info:', deviceInfo);
+    console.log('Responsive config:', responsiveConfig.getCurrentConfig());
+
+    // Get optimal game dimensions
+    const gameDimensions = responsiveConfig.getGameDimensions();
+
+    // Initialize game configuration with responsive settings
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
       parent: 'game-container',
@@ -43,7 +56,9 @@ function App() {
         mode: Phaser.Scale.RESIZE,
         width: window.innerWidth,
         height: window.innerHeight,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        // Enable zoom for high DPI devices
+        zoom: deviceInfo.devicePixelRatio > 1 ? 1 / deviceInfo.devicePixelRatio : 1
       },
       physics: {
         default: 'arcade',
@@ -52,7 +67,13 @@ function App() {
           debug: false
         }
       },
-      scene: [MenuScene, MainScene]
+      scene: [MenuScene, MainScene],
+      // Improve performance on mobile devices
+      render: {
+        antialias: !deviceInfo.isMobile, // Disable antialiasing on mobile for better performance
+        pixelArt: false,
+        roundPixels: true
+      }
     };
 
     // Create game instance if it doesn't exist

@@ -19,6 +19,18 @@ export class AudioManager {
     this.soundManager.playDotSound(index);
   }
 
+  playComboSound(comboCount: number) {
+    this.soundManager.playComboSound(comboCount);
+  }
+
+  playMilestoneSound(milestone: number) {
+    this.soundManager.playMilestoneSound(milestone);
+  }
+
+  playComboBreakSound() {
+    this.soundManager.playComboBreakSound();
+  }
+
   cleanup() {
     this.soundManager.cleanup();
   }

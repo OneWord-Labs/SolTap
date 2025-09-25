@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { COLORS } from '../constants';
 import { Logger } from '../../utils/Logger';
+import { RippleEffect } from '../effects/RippleEffect';
+import { ResponsiveConfig } from '../utils/ResponsiveConfig';
+import { DeviceDetector } from '../utils/DeviceDetector';
 
 export class Circle {
     private scene: Phaser.Scene;
@@ -14,34 +17,52 @@ export class Circle {
     private isActive = false;
     private hitAreaMargin: number = 0.20;
     private rippleEffect: RippleEffect;
+    private responsiveConfig: ResponsiveConfig;
+    private deviceDetector: DeviceDetector;
 
     constructor(scene: Phaser.Scene, x: number, y: number, isExpertMode: boolean) {
         this.scene = scene;
         this.isExpertMode = isExpertMode;
         this.logger = new Logger('Circle');
+        this.responsiveConfig = ResponsiveConfig.getInstance();
+        this.deviceDetector = DeviceDetector.getInstance();
+
         this.x = x;
         this.y = y;
-        this.radius = 25;
+
+        // Use responsive configuration for circle radius
+        const config = this.responsiveConfig.getCurrentConfig();
+        this.radius = config.circleRadius;
         this.isActive = false;
 
-        // Create circles in inactive state
+        // Create circles in inactive state with responsive sizing
         this.baseCircle = scene.add.circle(x, y, this.radius);
         this.baseCircle.setDepth(2);
-        this.innerCircle = scene.add.circle(x, y, 22);
+        this.innerCircle = scene.add.circle(x, y, this.radius * 0.88); // Inner circle is 88% of outer
         this.innerCircle.setDepth(3);
         this.rippleEffect = new RippleEffect(scene, x, y);
-        
+
         // Initialize state
         this.setInactiveState();
         this.setVisible(!isExpertMode);
-        
-        this.logger.info(`${isExpertMode ? 'Expert' : 'Novice'} mode circle created, setting ${isExpertMode ? 'invisible' : 'visible'}`);
+
+        this.logger.info(`${isExpertMode ? 'Expert' : 'Novice'} mode circle created (radius: ${this.radius}), setting ${isExpertMode ? 'invisible' : 'visible'}`);
 
         this.setupInputHandlers();
     }
 
     private setupInputHandlers(): void {
-        this.baseCircle.setInteractive();
+        // Calculate touch-friendly hit area
+        const config = this.responsiveConfig.getCurrentConfig();
+        const touchTargetSize = Math.max(config.touchTargetSize, this.radius * 2);
+        const hitRadius = touchTargetSize / 2;
+
+        this.baseCircle.setInteractive({
+            hitArea: new Phaser.Geom.Circle(0, 0, hitRadius),
+            hitAreaCallback: Phaser.Geom.Circle.Contains,
+            useHandCursor: true
+        });
+
         this.baseCircle.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             if (this.baseCircle.visible) {
                 this.playTapAnimation();
@@ -136,64 +157,5 @@ export class Circle {
         this.baseCircle.destroy();
         this.innerCircle.destroy();
         this.rippleEffect.destroy();
-    }
-}
-
-class RippleEffect {
-    private scene: Phaser.Scene;
-    private x: number;
-    private y: number;
-    private rings: Phaser.GameObjects.Arc[] = [];
-
-    constructor(scene: Phaser.Scene, x: number, y: number) {
-        this.scene = scene;
-        this.x = x;
-        this.y = y;
-    }
-
-    play(duration: number = 200): Promise<void> {
-        return new Promise((resolve) => {
-            const ringCount = 3;
-            const delay = duration / ringCount;
-            const maxScale = 3 + (duration / 200);
-
-            for (let i = 0; i < ringCount; i++) {
-                const ring = this.scene.add.circle(this.x, this.y, 25);
-                ring.setDepth(1);
-                this.rings.push(ring);
-
-                // Set initial state
-                ring.setScale(1);
-                ring.setAlpha(0.4);
-                ring.setStrokeStyle(2, i === 0 ? COLORS.primary : COLORS.secondary);
-                ring.setFillStyle(i === 0 ? COLORS.primary : COLORS.secondary, 0.1);
-
-                // Animation
-                this.scene.tweens.add({
-                    targets: ring,
-                    scale: maxScale,
-                    alpha: 0,
-                    duration: duration,
-                    delay: i * delay,
-                    ease: 'Cubic.easeOut',
-                    onComplete: () => {
-                        ring.destroy();
-                        if (i === ringCount - 1) {
-                            resolve();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    setPosition(x: number, y: number): void {
-        this.x = x;
-        this.y = y;
-    }
-
-    destroy(): void {
-        this.rings.forEach(ring => ring.destroy());
-        this.rings = [];
     }
 }

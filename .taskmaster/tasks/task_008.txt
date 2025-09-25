@@ -1,0 +1,11 @@
+# Task ID: 8
+# Title: Build Tutorial System
+# Status: in-progress
+# Dependencies: None
+# Priority: high
+# Description: Create interactive tutorial overlay for first-time players
+# Details:
+Design step-by-step tutorial flow covering all game mechanics. Implement interactive overlay with visual hints and arrows. Add skip option for returning players. Store tutorial completion state in local storage.
+
+# Test Strategy:
+Test tutorial flow completeness, verify skip functionality, test tutorial state persistence

@@ -1,0 +1,11 @@
+# Task ID: 3
+# Title: Build Combo System
+# Status: in-progress
+# Dependencies: None
+# Priority: high
+# Description: Implement combo tracking and score multipliers for consecutive correct patterns
+# Details:
+Track perfect streak counters, implement progressive score multipliers (1.5x, 2x, 3x, etc.), add visual feedback for active combos, display combo break notifications. Store highest combo achieved per session.
+
+# Test Strategy:
+Unit tests for combo logic, integration tests for score multiplier calculations, UI tests for visual feedback

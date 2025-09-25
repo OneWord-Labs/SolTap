@@ -1,0 +1,11 @@
+# Task ID: 2
+# Title: Create Practice Mode
+# Status: in-progress
+# Dependencies: None
+# Priority: high
+# Description: Implement practice mode with adjustable pattern display speeds for learning
+# Details:
+Add a practice mode toggle in the menu. When enabled, patterns display at slower speeds and score tracking is disabled. Include speed adjustment controls (slow/medium/normal). Ensure smooth transition between practice and normal modes.
+
+# Test Strategy:
+Test mode toggle functionality, verify speed adjustments work correctly, ensure score tracking is disabled in practice mode

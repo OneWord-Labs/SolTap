@@ -3,9 +3,13 @@ import { REWARDS } from '../constants';
 export class RewardSystem {
     private tokenBalance: number = 0;
 
-    calculateReward(level: number, isPerfect: boolean): number {
+    calculateReward(level: number, isPerfect: boolean, comboMultiplier: number = 1.0): number {
         const baseReward = REWARDS.baseTokens * Math.pow(REWARDS.multiplierPerLevel, level - 1);
-        const reward = isPerfect ? baseReward + REWARDS.bonusForPerfect : baseReward;
+        let reward = isPerfect ? baseReward + REWARDS.bonusForPerfect : baseReward;
+
+        // Apply combo multiplier
+        reward = Math.floor(reward * comboMultiplier);
+
         this.tokenBalance += reward;
         return reward;
     }

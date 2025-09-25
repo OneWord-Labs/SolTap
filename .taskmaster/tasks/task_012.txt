@@ -1,0 +1,11 @@
+# Task ID: 12
+# Title: Build Achievement System
+# Status: pending
+# Dependencies: 9
+# Priority: medium
+# Description: Implement backend logic for tracking and unlocking achievements
+# Details:
+Define achievement categories and progression tiers. Implement achievement tracking logic with unlock conditions. Create achievement storage system with progress tracking. Add achievement gallery UI with unlock animations.
+
+# Test Strategy:
+Test achievement unlock conditions, verify progress tracking, test achievement persistence

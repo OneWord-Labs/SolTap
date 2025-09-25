@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import MainScene from './scenes/MainScene';
 import { MenuScene } from './scenes/MenuScene';
+// Practice Mode removed - out of scope
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,

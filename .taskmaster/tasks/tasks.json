@@ -1,0 +1,279 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Implement Pattern Progress Indicator",
+        "description": "Add visual indicator showing current progress through pattern sequence (e.g., '3/5 correct')",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Create a UI component that displays the current position in the pattern sequence. Should be clearly visible during gameplay without being intrusive. Update in real-time as the player progresses through the pattern.",
+        "testStrategy": "Unit tests for progress tracking logic, visual regression tests for UI component, integration tests with game state",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Progress Indicator UI Component",
+            "description": "Create visual design and placement for progress indicator",
+            "status": "done",
+            "priority": "high",
+            "dependencies": []
+          },
+          {
+            "id": 2,
+            "title": "Implement Progress Tracking Logic",
+            "description": "Add state management for tracking pattern progress",
+            "status": "done",
+            "priority": "high",
+            "dependencies": [
+              "1.1"
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Integrate Progress Display with Game State",
+            "description": "Connect progress indicator to game's pattern system",
+            "status": "done",
+            "priority": "high",
+            "dependencies": [
+              "1.2"
+            ]
+          },
+          {
+            "id": 4,
+            "title": "Add Animations for Progress Updates",
+            "description": "Implement smooth transitions and feedback animations",
+            "status": "done",
+            "priority": "medium",
+            "dependencies": [
+              "1.3"
+            ]
+          },
+          {
+            "id": 5,
+            "title": "Test Progress Indicator Across Devices",
+            "description": "Ensure visibility and performance on all screen sizes",
+            "status": "done",
+            "priority": "medium",
+            "dependencies": [
+              "1.4"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Create Practice Mode",
+        "description": "Implement practice mode with adjustable pattern display speeds for learning",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Add a practice mode toggle in the menu. When enabled, patterns display at slower speeds and score tracking is disabled. Include speed adjustment controls (slow/medium/normal). Ensure smooth transition between practice and normal modes.",
+        "testStrategy": "Test mode toggle functionality, verify speed adjustments work correctly, ensure score tracking is disabled in practice mode",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Build Combo System",
+        "description": "Implement combo tracking and score multipliers for consecutive correct patterns",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Track perfect streak counters, implement progressive score multipliers (1.5x, 2x, 3x, etc.), add visual feedback for active combos, display combo break notifications. Store highest combo achieved per session.",
+        "testStrategy": "Unit tests for combo logic, integration tests for score multiplier calculations, UI tests for visual feedback",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement Power-ups System",
+        "description": "Add functional power-ups including slow-motion, hints, and skip options",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "Implement three core power-ups: Slow-motion (reduces pattern display speed by 50% for 10 seconds), Hint system (highlights next circle in sequence), Skip option (allows skipping difficult patterns with 50% score penalty). Add power-up UI controls and activation animations.",
+        "testStrategy": "Test each power-up functionality, verify timing and penalties, test power-up combinations and edge cases",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Add Pattern Variations",
+        "description": "Implement double-tap, hold, and simultaneous multi-circle patterns",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "Extend pattern system to support: Double-tap patterns (require two rapid taps on same circle), Hold patterns (press and hold for specified duration with visual timer), Simultaneous patterns (multiple circles must be tapped within 200ms window). Update pattern generator to include these variations.",
+        "testStrategy": "Test pattern recognition for each variation, verify timing windows, test edge cases and pattern combinations",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Musical Progression System",
+        "description": "Add musical notes to circles creating melodies when tapped",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "Assign musical notes to each circle position. Create melodic sequences that match pattern complexity. Implement progressive musical arrangements that evolve with gameplay. Use Web Audio API for low-latency audio playback.",
+        "testStrategy": "Test audio playback latency, verify musical sequences are melodic, test across different devices and browsers",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Create Dynamic Soundtrack",
+        "description": "Implement background music that intensifies with gameplay progression",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          "6"
+        ],
+        "details": "Create layered background music tracks. Implement smooth transitions between intensity levels based on score/level. Synchronize tempo changes with difficulty increases. Add crossfade between audio states.",
+        "testStrategy": "Test audio transitions, verify synchronization with gameplay, test performance impact of dynamic audio",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Build Tutorial System",
+        "description": "Create interactive tutorial overlay for first-time players",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Design step-by-step tutorial flow covering all game mechanics. Implement interactive overlay with visual hints and arrows. Add skip option for returning players. Store tutorial completion state in local storage.",
+        "testStrategy": "Test tutorial flow completeness, verify skip functionality, test tutorial state persistence",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Score Display Enhancements",
+        "description": "Add high score tracking, personal best indicators, and achievement notifications",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "Implement persistent high score storage, display personal best during gameplay, add score comparison overlays, create achievement notification system with animations. Use local storage with cloud sync capability.",
+        "testStrategy": "Test score persistence, verify achievement triggers, test notification display timing",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Add Pause Functionality",
+        "description": "Implement pause/resume functionality during gameplay",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Add pause button and keyboard shortcut (spacebar/escape). Implement game state freeze during pause. Create pause menu overlay with resume, restart, and quit options. Ensure timer stops during pause.",
+        "testStrategy": "Test pause/resume state management, verify timer behavior, test edge cases during pattern display",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Improve Responsive Design",
+        "description": "Optimize layouts for mobile, tablet, and desktop with landscape support",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Create responsive layouts for different screen sizes. Implement landscape mode with optimized UI arrangement. Ensure touch targets meet accessibility guidelines (44x44px minimum). Add viewport meta tags and CSS media queries.",
+        "testStrategy": "Test on various devices and screen sizes, verify touch target sizes, test orientation changes",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Build Achievement System",
+        "description": "Implement backend logic for tracking and unlocking achievements",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "9"
+        ],
+        "details": "Define achievement categories and progression tiers. Implement achievement tracking logic with unlock conditions. Create achievement storage system with progress tracking. Add achievement gallery UI with unlock animations.",
+        "testStrategy": "Test achievement unlock conditions, verify progress tracking, test achievement persistence",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Implement State Persistence",
+        "description": "Add save/resume functionality for interrupted games",
+        "status": "in-progress",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Implement game state serialization and deserialization. Save state to local storage on interruption/background. Add cloud sync capability using Telegram user ID. Implement conflict resolution for cloud saves.",
+        "testStrategy": "Test state save/restore, verify data integrity, test conflict resolution scenarios",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design game state serialization interface",
+            "description": "Define SavedGameState interface and serialization methods",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 13
+          },
+          {
+            "id": 2,
+            "title": "Create GameStateStorage service",
+            "description": "Implement local storage save/load functionality with error handling",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 13
+          },
+          {
+            "id": 3,
+            "title": "Implement auto-save functionality",
+            "description": "Add auto-save triggers during gameplay and game interruption",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 13
+          },
+          {
+            "id": 4,
+            "title": "Add resume game option to menu",
+            "description": "Update MenuScene to show resume option when saved state exists",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 13
+          },
+          {
+            "id": 5,
+            "title": "Handle edge cases and error scenarios",
+            "description": "Add validation, corruption handling, and storage failure recovery",
+            "details": "",
+            "status": "in-progress",
+            "dependencies": [],
+            "parentTaskId": 13
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Add Accessibility Features",
+        "description": "Implement haptic feedback, adjustable sizes, and screen reader support",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "Add haptic feedback for mobile devices with customizable intensity. Implement adjustable circle sizes and high contrast mode. Add proper ARIA labels and keyboard navigation. Include audio cues for visual elements.",
+        "testStrategy": "Test with screen readers, verify keyboard navigation, test haptic feedback on supported devices",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Optimize Performance",
+        "description": "Implement object pooling, asset preloading, and frame rate management",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Implement object pooling for game objects to reduce garbage collection. Add asset preloader with loading progress indicator. Implement adaptive quality settings based on device performance. Add frame skipping for low-end devices.",
+        "testStrategy": "Performance benchmarks on various devices, memory profiling, frame rate monitoring",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "activeTag": "master",
+      "createdAt": "2025-01-20T00:00:00.000Z",
+      "lastModified": "2025-01-20T00:00:00.000Z",
+      "version": "1.0.0",
+      "created": "2025-09-20T19:03:24.668Z",
+      "description": "Tasks for master context",
+      "updated": "2025-09-24T04:10:34.033Z"
+    }
+  }
+}

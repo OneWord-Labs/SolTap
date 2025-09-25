@@ -1,0 +1,43 @@
+# Task ID: 13
+# Title: Implement State Persistence
+# Status: in-progress
+# Dependencies: None
+# Priority: high
+# Description: Add save/resume functionality for interrupted games
+# Details:
+Implement game state serialization and deserialization. Save state to local storage on interruption/background. Add cloud sync capability using Telegram user ID. Implement conflict resolution for cloud saves.
+
+# Test Strategy:
+Test state save/restore, verify data integrity, test conflict resolution scenarios
+
+# Subtasks:
+## 1. Design game state serialization interface [pending]
+### Dependencies: None
+### Description: Define SavedGameState interface and serialization methods
+### Details:
+
+
+## 2. Create GameStateStorage service [pending]
+### Dependencies: None
+### Description: Implement local storage save/load functionality with error handling
+### Details:
+
+
+## 3. Implement auto-save functionality [pending]
+### Dependencies: None
+### Description: Add auto-save triggers during gameplay and game interruption
+### Details:
+
+
+## 4. Add resume game option to menu [pending]
+### Dependencies: None
+### Description: Update MenuScene to show resume option when saved state exists
+### Details:
+
+
+## 5. Handle edge cases and error scenarios [pending]
+### Dependencies: None
+### Description: Add validation, corruption handling, and storage failure recovery
+### Details:
+
+
