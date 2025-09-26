@@ -141,10 +141,17 @@ export class MenuScene extends Phaser.Scene {
     // Check if there's a saved game
     const hasSavedGame = this.gameStateStorage.hasSavedGame();
 
-    // Button configuration
-    const buttonSpacing = height * 0.09;
-    const startY = height * 0.48;
+    // Button configuration with dynamic spacing to avoid overlap
     const buttonWidth = Math.min(width * 0.6, 280);
+    const nominalButtonHeight = 54;
+    const minSpacing = nominalButtonHeight + 12; // ensure gap between buttons
+    const maxSpacing = Math.max(minSpacing, Math.min(height * 0.1, 84));
+
+    // Determine how many primary buttons will be shown
+    const totalPrimaryButtons = hasSavedGame ? 3 : 2; // Resume (optional), Novice, Expert
+    const clusterHeight = (totalPrimaryButtons - 1) * maxSpacing;
+    const centerY = height * 0.50; // center cluster vertically around mid-screen
+    const startY = centerY - clusterHeight / 2;
 
     let currentButtonIndex = 0;
 
@@ -152,7 +159,7 @@ export class MenuScene extends Phaser.Scene {
     if (hasSavedGame) {
       const resumeButton = new PhaserButton(this, {
         x: width / 2,
-        y: startY + buttonSpacing * currentButtonIndex,
+        y: startY + maxSpacing * currentButtonIndex,
         text: 'Resume Game',
         width: buttonWidth,
         height: 54,
@@ -170,7 +177,7 @@ export class MenuScene extends Phaser.Scene {
     // Novice Mode button with Solana green
     const noviceButton = new PhaserButton(this, {
       x: width / 2,
-      y: startY + buttonSpacing * currentButtonIndex,
+      y: startY + maxSpacing * currentButtonIndex,
       text: 'Novice Mode',
       width: buttonWidth,
       height: 54,
@@ -185,7 +192,7 @@ export class MenuScene extends Phaser.Scene {
     // Expert Mode button with Solana purple
     const expertButton = new PhaserButton(this, {
       x: width / 2,
-      y: startY + buttonSpacing * currentButtonIndex,
+      y: startY + maxSpacing * currentButtonIndex,
       text: 'Expert Mode',
       width: buttonWidth,
       height: 54,
@@ -198,17 +205,22 @@ export class MenuScene extends Phaser.Scene {
     currentButtonIndex++;
 
     // Add bottom utility buttons in a row
-    const utilityY = height - 70;
-    const utilitySpacing = 100;
-    const utilityStartX = width / 2 - (utilitySpacing * 1.5);
+    const utilityY = Math.max(height - 64, height * 0.82);
+    const utilityCount = 4;
+    const utilitySize = Math.min(50, Math.max(40, Math.floor(width / (utilityCount * 4))));
+    // Space evenly across available width with margins
+    const margin = Math.max(16, width * 0.06);
+    const usableWidth = width - margin * 2;
+    const step = usableWidth / (utilityCount - 1);
+    const utilityXs = new Array(utilityCount).fill(0).map((_, i) => Math.floor(margin + step * i));
 
     // Tutorial button
     const tutorialButton = new PhaserButton(this, {
-      x: utilityStartX,
+      x: utilityXs[0],
       y: utilityY,
       text: '?',
-      width: 50,
-      height: 50,
+      width: utilitySize,
+      height: utilitySize,
       variant: 'ghost',
       fontSize: '24px',
       onClick: async () => {
@@ -221,11 +233,11 @@ export class MenuScene extends Phaser.Scene {
 
     // Settings button
     const settingsButton = new PhaserButton(this, {
-      x: utilityStartX + utilitySpacing,
+      x: utilityXs[1],
       y: utilityY,
       text: '⚙',
-      width: 50,
-      height: 50,
+      width: utilitySize,
+      height: utilitySize,
       variant: 'ghost',
       fontSize: '24px',
       onClick: async () => {
@@ -238,11 +250,11 @@ export class MenuScene extends Phaser.Scene {
 
     // Leaderboard button
     const leaderButton = new PhaserButton(this, {
-      x: utilityStartX + utilitySpacing * 2,
+      x: utilityXs[2],
       y: utilityY,
       text: '🏆',
-      width: 50,
-      height: 50,
+      width: utilitySize,
+      height: utilitySize,
       variant: 'ghost',
       fontSize: '24px',
       onClick: async () => {
@@ -255,11 +267,11 @@ export class MenuScene extends Phaser.Scene {
 
     // Share button
     const shareButton = new PhaserButton(this, {
-      x: utilityStartX + utilitySpacing * 3,
+      x: utilityXs[3],
       y: utilityY,
       text: '📤',
-      width: 50,
-      height: 50,
+      width: utilitySize,
+      height: utilitySize,
       variant: 'ghost',
       fontSize: '24px',
       onClick: async () => {
