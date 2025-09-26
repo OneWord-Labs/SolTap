@@ -1,6 +1,6 @@
 import { Pattern, DifficultyMode, GameMode } from '../types';
 import { Circle } from '../components/Circle';
-import { AudioManager } from './audioManager';
+import { AudioManager } from './AudioManager';
 import { GAME_CONFIG } from '../constants';
 import { Logger } from '../../utils/Logger';
 
@@ -23,6 +23,9 @@ export class PatternManager {
 
     async showPattern(patterns: Pattern[]): Promise<void> {
         this.logger.info('Showing pattern:', patterns);
+
+        // Initialize audio on pattern show (might be first interaction)
+        await this.audioManager.initialize();
 
         for (const pattern of patterns) {
             await this.delay(this.getAdjustedDelay(GAME_CONFIG.patternShowDelay));

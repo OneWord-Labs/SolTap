@@ -11,15 +11,18 @@ import {
 import { ResponsiveConfig } from '../utils/ResponsiveConfig';
 import { DeviceDetector } from '../utils/DeviceDetector';
 import { GameStateStorage } from '../services/GameStateStorage';
+import { PhaserButton } from '../components/PhaserButton';
+import { AudioManager } from '../utils/AudioManager';
 
 export class MenuScene extends Phaser.Scene {
   private title!: Phaser.GameObjects.Text;
-  private buttons: Phaser.GameObjects.Text[] = [];
+  private buttons: PhaserButton[] = [];
   private welcomeText!: Phaser.GameObjects.Text;
   private tutorialManager!: TutorialManager;
   private responsiveConfig: ResponsiveConfig;
   private deviceDetector: DeviceDetector;
   private gameStateStorage!: GameStateStorage;
+  private audioManager!: AudioManager;
 
   constructor() {
     super({ key: 'MenuScene' });
@@ -30,6 +33,9 @@ export class MenuScene extends Phaser.Scene {
   create() {
     // Initialize game state storage
     this.gameStateStorage = new GameStateStorage();
+
+    // Initialize audio manager
+    this.audioManager = new AudioManager();
 
     this.createMenuElements();
     this.scale.on('resize', this.handleResize, this);
@@ -94,7 +100,7 @@ export class MenuScene extends Phaser.Scene {
 
   private createMenuElements() {
     const { width, height } = this.cameras.main;
-    
+
     // Welcome message - positioned at 15% of screen height
     if (window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name) {
       const userName = window.Telegram.WebApp.initDataUnsafe.user.first_name;
@@ -106,14 +112,27 @@ export class MenuScene extends Phaser.Scene {
         align: 'center'
       }).setOrigin(0.5);
     }
-    
-    // Title - positioned at 35% of screen height
+
+    // Title - positioned at 35% of screen height with Solana green
     this.title = this.add.text(width / 2, height * 0.35, 'Sol Tap', {
-      fontSize: this.calculateFontSize(48),
+      fontSize: this.calculateFontSize(56),
       color: '#14F195',
       fontFamily: 'Arial',
-      fontStyle: 'bold'
+      fontStyle: 'bold',
+      stroke: '#14F195',
+      strokeThickness: 1
     }).setOrigin(0.5);
+
+    // Add subtle title animation
+    this.tweens.add({
+      targets: this.title,
+      scaleX: 1.05,
+      scaleY: 1.05,
+      duration: 2000,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1
+    });
 
     // Clear existing buttons
     this.buttons.forEach(button => button.destroy());
@@ -122,50 +141,136 @@ export class MenuScene extends Phaser.Scene {
     // Check if there's a saved game
     const hasSavedGame = this.gameStateStorage.hasSavedGame();
 
-    // Calculate button layout based on whether resume button is shown
-    const buttonSpacing = height * 0.08; // 8% of screen height for tighter spacing
-    const totalButtons = hasSavedGame ? 4 : 3; // Include resume button if saved game exists
-    const startY = height * 0.4; // Start higher to accommodate more buttons
+    // Button configuration
+    const buttonSpacing = height * 0.09;
+    const startY = height * 0.48;
+    const buttonWidth = Math.min(width * 0.6, 280);
 
     let currentButtonIndex = 0;
 
     // Resume Game button (if saved game exists)
     if (hasSavedGame) {
-      this.buttons.push(
-        this.createResumeButton(
-          width / 2,
-          startY + buttonSpacing * currentButtonIndex,
-          'Resume Game'
-        )
-      );
+      const resumeButton = new PhaserButton(this, {
+        x: width / 2,
+        y: startY + buttonSpacing * currentButtonIndex,
+        text: 'Resume Game',
+        width: buttonWidth,
+        height: 54,
+        variant: 'warning',
+        onClick: async () => {
+          await this.audioManager.initialize();
+          this.audioManager.playMenuClick();
+          this.resumeGame();
+        }
+      });
+      this.buttons.push(resumeButton);
       currentButtonIndex++;
     }
 
-    // Novice Mode button
-    this.buttons.push(
-      this.createModeButton(
-        width / 2,
-        startY + buttonSpacing * currentButtonIndex,
-        'Novice Mode',
-        'novice',
-        'normal'
-      )
-    );
+    // Novice Mode button with Solana green
+    const noviceButton = new PhaserButton(this, {
+      x: width / 2,
+      y: startY + buttonSpacing * currentButtonIndex,
+      text: 'Novice Mode',
+      width: buttonWidth,
+      height: 54,
+      variant: 'primary',
+      onClick: async () => {
+        await this.initializeAudioAndStart('novice', 'normal');
+      }
+    });
+    this.buttons.push(noviceButton);
     currentButtonIndex++;
 
-    // Expert Mode button
-    this.buttons.push(
-      this.createModeButton(
-        width / 2,
-        startY + buttonSpacing * currentButtonIndex,
-        'Expert Mode',
-        'expert',
-        'normal'
-      )
-    );
+    // Expert Mode button with Solana purple
+    const expertButton = new PhaserButton(this, {
+      x: width / 2,
+      y: startY + buttonSpacing * currentButtonIndex,
+      text: 'Expert Mode',
+      width: buttonWidth,
+      height: 54,
+      variant: 'secondary',
+      onClick: async () => {
+        await this.initializeAudioAndStart('expert', 'normal');
+      }
+    });
+    this.buttons.push(expertButton);
     currentButtonIndex++;
 
-    // Practice Mode removed - out of scope
+    // Add bottom utility buttons in a row
+    const utilityY = height - 70;
+    const utilitySpacing = 100;
+    const utilityStartX = width / 2 - (utilitySpacing * 1.5);
+
+    // Tutorial button
+    const tutorialButton = new PhaserButton(this, {
+      x: utilityStartX,
+      y: utilityY,
+      text: '?',
+      width: 50,
+      height: 50,
+      variant: 'ghost',
+      fontSize: '24px',
+      onClick: async () => {
+        await this.audioManager.initialize();
+        this.audioManager.playMenuClick();
+        this.checkAndShowTutorial();
+      }
+    });
+    this.buttons.push(tutorialButton);
+
+    // Settings button
+    const settingsButton = new PhaserButton(this, {
+      x: utilityStartX + utilitySpacing,
+      y: utilityY,
+      text: '⚙',
+      width: 50,
+      height: 50,
+      variant: 'ghost',
+      fontSize: '24px',
+      onClick: async () => {
+        await this.audioManager.initialize();
+        this.audioManager.playMenuClick();
+        console.log('Settings');
+      }
+    });
+    this.buttons.push(settingsButton);
+
+    // Leaderboard button
+    const leaderButton = new PhaserButton(this, {
+      x: utilityStartX + utilitySpacing * 2,
+      y: utilityY,
+      text: '🏆',
+      width: 50,
+      height: 50,
+      variant: 'ghost',
+      fontSize: '24px',
+      onClick: async () => {
+        await this.audioManager.initialize();
+        this.audioManager.playMenuClick();
+        console.log('Leaderboard');
+      }
+    });
+    this.buttons.push(leaderButton);
+
+    // Share button
+    const shareButton = new PhaserButton(this, {
+      x: utilityStartX + utilitySpacing * 3,
+      y: utilityY,
+      text: '📤',
+      width: 50,
+      height: 50,
+      variant: 'ghost',
+      fontSize: '24px',
+      onClick: async () => {
+        await this.audioManager.initialize();
+        this.audioManager.playMenuClick();
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.switchInlineQuery('Play Sol Tap!', ['users']);
+        }
+      }
+    });
+    this.buttons.push(shareButton);
   }
 
   private calculateFontSize(baseSize: number, type: 'level' | 'menu' | 'ui' = 'menu'): string {
@@ -323,6 +428,7 @@ export class MenuScene extends Phaser.Scene {
   private handleResize(gameSize: Phaser.Structs.Size) {
     const { width, height } = gameSize;
     this.cameras.main.setViewport(0, 0, width, height);
+
     this.createMenuElements(); // Recreate all elements with new dimensions
 
     // Resize tutorial if active
@@ -359,6 +465,21 @@ export class MenuScene extends Phaser.Scene {
         }
       );
     }
+  }
+
+  private async initializeAudioAndStart(mode: DifficultyMode, gameMode: GameMode = 'normal') {
+    // Initialize audio on first user interaction
+    try {
+      await this.audioManager.initialize();
+      console.log('Audio initialized successfully');
+      // Play a subtle click to confirm input
+      this.audioManager.playMenuClick();
+    } catch (error) {
+      console.error('Failed to initialize audio:', error);
+    }
+
+    // Start the game
+    this.startGame(mode, gameMode);
   }
 
   private startGame(mode: DifficultyMode, gameMode: GameMode = 'normal') {
