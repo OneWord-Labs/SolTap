@@ -1,6 +1,8 @@
 name: CI
 on:
   workflow_dispatch:
+  push:
+    branches: [chore/ci-config]
 permissions:
   contents: read
   actions: write
